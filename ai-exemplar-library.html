@@ -1,0 +1,1063 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AI Exemplar Library</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+body{margin:0}img{max-width:100%}[hidden]{display:none!important}
+
+/* Layout: lake-blue masthead band, then a filter rail + lesson grid; lessons open in a side drawer. Practice colors are the six MDE practices. */
+:root{
+  --paper:#F2F5F6; --surface:#FFFFFF; --ink:#0F2830; --muted:#566A71; --line:#D3DEE2; --soft:#E6EDF0;
+  --lake:#0D5E78; --lake-ink:#FFFFFF; --band:#0B3D4E; --band-ink:#EAF4F7; --band-muted:#A9C7D1; --sand:#E2A53A;
+  --p1:#1D63A6; --p2:#6A4B9E; --p3:#11765F; --p4:#A64D17; --p5:#A02F5C; --p6:#5E6E14;
+  --scrim:rgba(8,28,36,.45);
+  --display:"Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --body:"Source Sans 3", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --gut-l:max(16px, env(safe-area-inset-left, 0px)); --gut-r:max(16px, env(safe-area-inset-right, 0px));
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#0C1A1F; --surface:#13252B; --ink:#E4EEF1; --muted:#9AB0B7; --line:#284047; --soft:#1A3037;
+  --lake:#5CB8D6; --lake-ink:#06212A; --band:#082F3C; --band-ink:#E4F2F6; --band-muted:#8FB7C4; --sand:#F0BC5E;
+  --p1:#6FAEEA; --p2:#B49AE6; --p3:#4FC8A6; --p4:#EE9A5E; --p5:#EE7FA9; --p6:#B6C95A;
+  --scrim:rgba(0,0,0,.6); color-scheme:dark }}
+:root[data-theme="dark"]{
+  --paper:#0C1A1F; --surface:#13252B; --ink:#E4EEF1; --muted:#9AB0B7; --line:#284047; --soft:#1A3037;
+  --lake:#5CB8D6; --lake-ink:#06212A; --band:#082F3C; --band-ink:#E4F2F6; --band-muted:#8FB7C4; --sand:#F0BC5E;
+  --p1:#6FAEEA; --p2:#B49AE6; --p3:#4FC8A6; --p4:#EE9A5E; --p5:#EE7FA9; --p6:#B6C95A;
+  --scrim:rgba(0,0,0,.6); color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5}
+a{color:var(--lake)}
+:focus-visible{outline:3px solid var(--sand);outline-offset:2px;border-radius:4px}
+.wrap{max-width:1240px;margin:0 auto;padding-left:var(--gut-l);padding-right:var(--gut-r)}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.15}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+
+/* masthead */
+.mast{background:var(--band);color:var(--band-ink)}
+.mast .wrap{padding-block:36px 0;display:grid;gap:18px}
+.mast .top{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between}
+.mast .eyebrow{color:var(--band-muted)}
+.proto{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--sand);color:var(--sand);padding:3px 8px;border-radius:99px}
+.mast h1{font-size:clamp(34px,5.4vw,58px);font-weight:700;letter-spacing:-.02em;max-width:16ch}
+.mast p.lede{margin:0;max-width:62ch;color:var(--band-muted);font-size:18px}
+.mast p.lede b{color:var(--band-ink);font-weight:600}
+.legend-strip{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--band-muted)}
+.legend-strip span{display:inline-flex;align-items:center;gap:6px}
+.legend-strip i{width:10px;height:10px;border-radius:2px;display:inline-block}
+.tabs{display:flex;gap:4px;margin-top:10px;overflow-x:auto}
+.tabs a{font-family:var(--display);font-weight:500;font-size:16px;text-decoration:none;color:var(--band-muted);padding:12px 16px 14px;border-radius:10px 10px 0 0;white-space:nowrap}
+.tabs a:hover{color:var(--band-ink)}
+.tabs a[aria-current="page"]{background:var(--paper);color:var(--ink)}
+
+main .wrap{padding-block:28px 64px}
+
+/* browse layout */
+.browse{display:grid;grid-template-columns:268px minmax(0,1fr);gap:32px;align-items:start}
+.rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px);display:grid;gap:22px;max-height:calc(100vh - 32px);overflow:auto;padding-right:4px}
+.rail details{display:contents}
+.rail summary{display:none}
+.fgroup{display:grid;gap:8px}
+.fgroup h3{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.search{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:5px 11px;border-radius:99px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.chip:hover{border-color:var(--lake)}
+.chip[aria-pressed="true"]{background:var(--lake);color:var(--lake-ink);border-color:var(--lake)}
+.chip .n{font-family:var(--mono);font-size:11px;opacity:.7}
+.checks{display:grid;gap:2px}
+.checks label{display:flex;align-items:center;gap:8px;font-size:15px;cursor:pointer;padding:3px 0}
+.checks label .n{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.checks input{accent-color:var(--lake);width:16px;height:16px;margin:0}
+.pchip{font:inherit;font-size:14px;text-align:left;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:6px 10px;border-radius:8px;cursor:pointer;display:flex;gap:8px;align-items:center;width:100%}
+.pchip .num{font-family:var(--mono);font-size:11px;width:20px;height:20px;border-radius:5px;display:grid;place-items:center;color:var(--surface);background:var(--c);flex:none}
+.pchip[aria-pressed="true"]{border-color:var(--c);box-shadow:inset 0 0 0 1px var(--c);background:color-mix(in srgb,var(--c) 12%,var(--surface))}
+.pchip .n{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.toggle{display:flex;gap:8px;align-items:center;font-size:14px;color:var(--muted);cursor:pointer}
+.toggle input{accent-color:var(--lake)}
+select{font:inherit;font-size:15px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);width:100%}
+.clear{font:inherit;font-size:14px;background:none;border:0;color:var(--lake);text-decoration:underline;cursor:pointer;padding:0;justify-self:start}
+
+.resbar{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;margin-bottom:16px}
+.resbar .count{font-family:var(--display);font-size:20px}
+.resbar .count span{color:var(--muted);font-family:var(--body);font-size:15px}
+.resbar label{display:flex;gap:8px;align-items:center;font-size:14px;color:var(--muted)}
+.resbar select{width:auto}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr));gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 18px 14px;display:flex;flex-direction:column;gap:10px;cursor:pointer;text-align:left;font:inherit;color:inherit;transition:border-color .15s,transform .15s}
+.card:hover{border-color:var(--lake);transform:translateY(-1px)}
+.meta{font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 10px}
+.meta .gr{color:var(--lake);font-weight:500}
+.card h2{font-size:19px;font-weight:700;letter-spacing:-.005em}
+.card p{margin:0;color:var(--muted);font-size:15px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.tools{font-size:13px;color:var(--muted)}
+.tools b{font-weight:600;color:var(--ink)}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:auto;padding-top:10px;border-top:1px solid var(--soft)}
+.tag{font-size:12px;font-weight:600;padding:3px 8px 3px 6px;border-radius:5px;display:inline-flex;align-items:center;gap:5px;color:var(--c);background:color-mix(in srgb,var(--c) 13%,transparent);border:1px solid transparent;white-space:nowrap}
+.tag::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c)}
+.tag.partial{background:transparent;border:1px dashed color-mix(in srgb,var(--c) 70%,transparent);font-weight:500}
+.tag.partial::before{background:transparent;box-shadow:inset 0 0 0 1.5px var(--c)}
+.empty{padding:48px 24px;text-align:center;border:1px dashed var(--line);border-radius:12px;color:var(--muted)}
+
+/* drawer */
+.scrim{position:fixed;inset:0;background:var(--scrim);z-index:20}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(720px,100%);background:var(--paper);z-index:21;overflow:auto;box-shadow:-12px 0 40px rgba(0,0,0,.18);
+  padding-top:calc(env(safe-area-inset-top,0px) + 20px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 40px);padding-right:max(24px, env(safe-area-inset-right,0px));padding-left:24px}
+.drawer .close{position:sticky;top:0;float:right;font:inherit;font-size:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:99px;padding:6px 14px;cursor:pointer;z-index:1}
+.drawer h2{font-size:clamp(26px,3.6vw,34px);font-weight:700;letter-spacing:-.015em;margin:10px 0 12px;clear:both}
+.dsec{margin-top:26px;display:grid;gap:10px}
+.dsec>h3{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.drawer p{margin:0 0 10px;max-width:65ch}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.facts div{min-width:0}
+.facts dt{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.facts dd{margin:2px 0 0;font-size:15px}
+.ben{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.ben h4{margin:0 0 6px;font-family:var(--display);font-size:16px}
+.ben ul{margin:0;padding-left:18px;display:grid;gap:4px;font-size:15px}
+.links{display:flex;flex-wrap:wrap;gap:8px}
+.links a{display:inline-flex;align-items:center;gap:6px;text-decoration:none;font-size:14px;font-weight:600;padding:7px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface)}
+.links a.primary{background:var(--lake);color:var(--lake-ink);border-color:var(--lake)}
+.links a:hover{border-color:var(--lake)}
+.align{display:grid;gap:6px}
+.arow{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 12px;border-radius:8px;background:var(--surface);border:1px solid var(--line)}
+.arow .dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--c)}
+.arow.s2 .dot{background:var(--c)}
+.arow.s0{opacity:.55;background:transparent}
+.arow.s0 .dot{border-style:dotted;border-color:var(--muted)}
+.arow .lvl{font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.arow strong{font-weight:600}
+.evidence{font-size:15px;color:var(--muted);border-left:3px solid var(--line);padding-left:12px;margin:6px 0 0}
+.credits{display:grid;gap:4px;font-size:15px}
+.credits span{color:var(--muted)}
+
+/* practices view */
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,360px),1fr));gap:16px;margin-top:20px}
+.pcard{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;display:grid;gap:10px;border-top:4px solid var(--c)}
+.pcard h3{font-size:20px;display:flex;gap:10px;align-items:baseline}
+.pcard h3 .num{font-family:var(--mono);font-size:13px;color:var(--c)}
+.pcard p{margin:0;color:var(--muted);font-size:15px}
+.bar{display:flex;height:10px;border-radius:99px;overflow:hidden;background:var(--soft)}
+.bar i{display:block;height:100%}
+.barlab{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.pcard .go{font:inherit;font-size:14px;font-weight:600;color:var(--lake);background:none;border:0;padding:0;cursor:pointer;justify-self:start;text-decoration:underline}
+.intro{max-width:70ch;color:var(--muted);font-size:17px;margin:8px 0 0}
+.section-h{font-size:clamp(24px,3vw,32px);font-weight:700;letter-spacing:-.015em}
+.matrix-wrap{overflow-x:auto;margin-top:16px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table.matrix{border-collapse:collapse;width:100%;min-width:760px;font-size:14px}
+.matrix th,.matrix td{padding:8px 10px;border-bottom:1px solid var(--soft);text-align:center;vertical-align:middle}
+.matrix th{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);position:sticky;top:0;background:var(--surface)}
+.matrix th:first-child,.matrix td:first-child{text-align:left}
+.matrix td:first-child button{font:inherit;background:none;border:0;padding:0;color:var(--ink);text-align:left;cursor:pointer;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
+.matrix td:first-child button:hover{color:var(--lake)}
+.matrix .gr{font-family:var(--mono);font-size:12px;color:var(--muted);white-space:nowrap}
+.mk{display:inline-block;width:14px;height:14px;border-radius:50%;border:2px solid var(--c);vertical-align:middle}
+.mk.s2{background:var(--c)}
+.matrix tfoot td{font-family:var(--mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.keyline{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px;color:var(--muted);margin-top:14px;align-items:center}
+.keyline .mk{--c:var(--ink);margin-right:6px}
+
+/* roadmap */
+.road{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:16px;margin-top:20px}
+.rcard{border:1px dashed var(--line);border-radius:12px;padding:20px;display:grid;gap:10px;align-content:start;background:transparent}
+.rcard.live{border-style:solid;background:var(--surface)}
+.status{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;justify-self:start;padding:3px 8px;border-radius:99px;border:1px solid currentColor;color:var(--muted)}
+.rcard.live .status{color:var(--p3)}
+.rcard h3{font-size:21px}
+.rcard p{margin:0;color:var(--muted);font-size:15px}
+.rcard ul{margin:0;padding-left:18px;font-size:15px;display:grid;gap:4px}
+.note{margin-top:28px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--sand);border-radius:10px;padding:16px 18px;max-width:80ch}
+.note h3{font-size:17px;margin-bottom:6px}
+.note p{margin:0;color:var(--muted);font-size:15px}
+footer{border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+footer .wrap{padding-block:20px 32px}
+
+/* submit + review */
+.subwrap{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:32px;align-items:start;margin-top:20px}
+.form{display:grid;gap:20px;min-width:0}
+.form fieldset{border:1px solid var(--line);border-radius:12px;padding:6px 18px 18px;background:var(--surface);display:grid;gap:16px;margin:0;min-width:0}
+.form legend{font-family:var(--display);font-weight:700;font-size:18px;padding:0 6px}
+.field{display:grid;gap:6px;min-width:0}
+.lab{font-weight:600;font-size:15px}
+.lab .req{color:var(--p5);margin-left:2px}
+.hint{font-size:13px;color:var(--muted);margin:0}
+.form input[type=text],.form input[type=url],.form input[type=email],.form textarea,.form select,.rv textarea,.rv input[type=text]{font:inherit;font-size:15px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);width:100%}
+.form textarea,.rv textarea{min-height:96px;resize:vertical}
+.field .err{color:var(--p5);font-size:13px;margin:0}
+.field.invalid input,.field.invalid textarea,.field.invalid .cb-grid{border-color:var(--p5);box-shadow:0 0 0 1px var(--p5);border-radius:8px}
+.cb-grid{display:flex;flex-wrap:wrap;gap:6px}
+.cb-grid label{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--line);border-radius:99px;padding:5px 12px;font-size:14px;cursor:pointer;background:var(--paper)}
+.cb-grid input{position:absolute;opacity:0;pointer-events:none}
+.cb-grid label:has(input:checked){background:var(--lake);color:var(--lake-ink);border-color:var(--lake)}
+.cb-grid label:has(input:focus-visible){outline:3px solid var(--sand);outline-offset:2px}
+.resrow{display:grid;grid-template-columns:200px minmax(0,1fr) auto;gap:8px;align-items:center}
+.iconbtn{font:inherit;font-size:13px;border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:8px;padding:8px 10px;cursor:pointer}
+.prow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 16px;align-items:center;padding:10px 0;border-bottom:1px solid var(--soft)}
+.prow:last-of-type{border-bottom:0}
+.prow strong{display:flex;gap:8px;align-items:center;font-weight:600}
+.prow strong .num{font-family:var(--mono);font-size:11px;width:20px;height:20px;border-radius:5px;display:grid;place-items:center;color:var(--surface);background:var(--c);flex:none}
+.prow p{margin:2px 0 0;font-size:13px;color:var(--muted)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--paper)}
+.seg label{padding:6px 10px;font-size:13px;cursor:pointer;border-left:1px solid var(--line);white-space:nowrap}
+.seg label:first-child{border-left:0}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label.v2:has(input:checked){background:var(--c);color:var(--surface)}
+.seg label.v1:has(input:checked){background:color-mix(in srgb,var(--c) 22%,var(--surface));color:var(--ink)}
+.seg label.v0:has(input:checked){background:var(--soft);color:var(--ink)}
+.seg label:has(input:focus-visible){outline:3px solid var(--sand);outline-offset:-3px}
+.consent{display:flex;gap:10px;align-items:flex-start;font-size:15px;cursor:pointer}
+.consent input{accent-color:var(--lake);width:18px;height:18px;margin:2px 0 0;flex:none}
+.btn{font:inherit;font-weight:600;font-size:15px;padding:10px 18px;border-radius:8px;border:1px solid var(--lake);background:var(--lake);color:var(--lake-ink);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--lake)}
+.btn.danger{background:transparent;color:var(--p5);border-color:var(--p5)}
+.btn:disabled{opacity:.55;cursor:default}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.banner{border-radius:10px;padding:14px 16px;border:1px solid var(--line);border-left:4px solid var(--lake);background:var(--surface);font-size:15px;display:grid;gap:8px}
+.banner.warn{border-left-color:var(--sand)}
+.banner.ok{border-left-color:var(--p3)}
+.banner.bad{border-left-color:var(--p5)}
+.banner p{margin:0}
+.banner textarea{font-family:var(--mono);font-size:12px;min-height:180px;width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink)}
+.subside{display:grid;gap:16px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px)}
+.sidebox{border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:10px;background:var(--surface)}
+.sidebox h3{font-size:17px}
+.sidebox ul{margin:0;padding-left:18px;font-size:14px;color:var(--muted);display:grid;gap:6px}
+.mine{display:grid;gap:10px}
+.mine .it{display:grid;gap:4px;padding-top:10px;border-top:1px solid var(--soft);font-size:14px}
+.mine .it:first-child{border-top:0;padding-top:0}
+.mine .it b{font-weight:600}
+.mine .it .row{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;color:var(--muted);font-size:13px}
+.pill{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:99px;border:1px solid currentColor;white-space:nowrap}
+.pill.submitted{color:var(--sand)}
+.pill.approved{color:var(--p3)}
+.pill.declined{color:var(--p5)}
+.newpill{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--sand)}
+.linkbtn{font:inherit;font-size:13px;background:none;border:0;padding:0;color:var(--lake);text-decoration:underline;cursor:pointer}
+.rvbar{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0}
+.rvlist{display:grid;gap:12px}
+.rv{border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.rv>summary{list-style:none;cursor:pointer;padding:14px 16px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;align-items:center}
+.rv>summary::-webkit-details-marker{display:none}
+.rv>summary h3{font-size:18px}
+.rv>summary .by{grid-column:1;font-size:13px;color:var(--muted)}
+.rv>summary .pill{grid-row:1/3;grid-column:2}
+.rvbody{padding:0 16px 18px;display:grid;gap:14px;border-top:1px solid var(--soft);padding-top:14px}
+.rvbody p{margin:0;max-width:70ch}
+.rvbody .facts{background:var(--paper)}
+.tool-chip{display:inline-flex;font-size:14px;font-weight:600;padding:7px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+@media (max-width:960px){ .subwrap{grid-template-columns:minmax(0,1fr)} .subside{position:static} }
+@media (max-width:600px){ .resrow{grid-template-columns:minmax(0,1fr) auto} .resrow select{grid-column:1/-1} .prow{grid-template-columns:minmax(0,1fr)} }
+
+@media (max-width:860px){
+  .browse{grid-template-columns:minmax(0,1fr);gap:18px}
+  .rail{position:static;max-height:none;overflow:visible;padding:0}
+  .rail details{display:block;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+  .rail summary{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;cursor:pointer;font-family:var(--display);font-weight:500}
+  .rail summary .n{font-family:var(--mono);font-size:12px;color:var(--muted)}
+  .rail .inner{display:grid;gap:20px;padding:4px 14px 16px}
+  .drawer{padding-left:var(--gut-l);padding-right:var(--gut-r)}
+}
+@media (min-width:861px){ .rail .inner{display:grid;gap:22px} }
+@media (prefers-reduced-motion:reduce){ *{transition:none!important} }
+</style>
+</head>
+<body>
+
+<header class="mast">
+  <div class="wrap">
+    <div class="top">
+      <span class="eyebrow">AI Ambassadors · Teacher-built lessons</span>
+      <span class="proto" title="This is a working prototype shared for feedback">Prototype for feedback</span>
+    </div>
+    <h1>AI Exemplar Library</h1>
+    <p class="lede">Classroom-tested ways teachers are using AI, from Pre-K to AP Government. Browse <b id="statN">32 exemplars</b> by grade, subject and tool. Tags at the bottom of each lesson show which <b>MDE Essential AI Practices</b> it models.</p>
+    <div class="legend-strip" id="legendStrip" aria-label="Practice tag colors"></div>
+    <nav class="tabs" aria-label="Sections">
+      <a href="#browse" data-view="browse">Browse lessons</a>
+      <a href="#practices" data-view="practices">MDE practice alignment</a>
+      <a href="#submit" data-view="submit">Submit a lesson</a>
+      <a href="#review" data-view="review" id="tabReview" hidden>Review submissions</a>
+      <a href="#roadmap" data-view="roadmap">Coming to the library</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <section id="view-browse">
+      <div class="browse">
+        <aside class="rail" aria-label="Filters">
+          <details id="filterDetails">
+            <summary>Filters <span class="n" id="activeCount"></span></summary>
+            <div class="inner">
+              <div class="fgroup">
+                <h3><label for="q">Search</label></h3>
+                <input class="search" id="q" type="search" placeholder="Title, tool, teacher…" autocomplete="off">
+              </div>
+              <div class="fgroup">
+                <h3>Grade band</h3>
+                <div class="chips" id="fBand"></div>
+              </div>
+              <div class="fgroup">
+                <h3>Subject</h3>
+                <div class="checks" id="fSubject"></div>
+              </div>
+              <div class="fgroup">
+                <h3>MDE practice</h3>
+                <div class="checks" id="fPractice" style="gap:6px"></div>
+                <label class="toggle"><input type="checkbox" id="fPartial"> Include partially evident</label>
+              </div>
+              <div class="fgroup">
+                <h3><label for="fTool">AI tool</label></h3>
+                <select id="fTool"><option value="">Any tool</option></select>
+              </div>
+              <div class="fgroup">
+                <h3>Who uses the AI</h3>
+                <div class="chips" id="fRole"></div>
+              </div>
+              <div class="fgroup">
+                <h3>Resource type</h3>
+                <div class="checks" id="fFormat"></div>
+              </div>
+              <button class="clear" id="clearAll" type="button">Clear all filters</button>
+            </div>
+          </details>
+        </aside>
+        <div style="min-width:0">
+          <div class="resbar">
+            <div class="count" id="count" aria-live="polite"></div>
+            <label for="sort">Sort
+              <select id="sort">
+                <option value="title">Title A–Z</option>
+                <option value="grade">Grade, youngest first</option>
+                <option value="gradeDesc">Grade, oldest first</option>
+                <option value="practices">Most practices modeled</option>
+              </select>
+            </label>
+          </div>
+          <div class="grid" id="grid"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-practices" hidden>
+      <h2 class="section-h">MDE Essential AI Practices</h2>
+      <p class="intro">Each exemplar was reviewed against the six Michigan Department of Education Essential AI Practices. A filled tag means the practice is clearly evident in the lesson; a dashed tag means it is partially evident or implied. Ratings are judgment calls based on each exemplar's description and benefits.</p>
+      <div class="pgrid" id="pgrid"></div>
+      <h2 class="section-h" style="margin-top:44px">Alignment at a glance</h2>
+      <p class="intro">The full reference sheet. Select a lesson title to open it.</p>
+      <div class="keyline"><span><i class="mk s2"></i>Clearly evident</span><span><i class="mk"></i>Partially evident</span><span>Blank = not evident</span></div>
+      <div class="matrix-wrap"><table class="matrix" id="matrix"></table></div>
+    </section>
+
+    <section id="view-submit" hidden>
+      <h2 class="section-h">Submit a lesson</h2>
+      <p class="intro">Share a lesson where you or your students used AI. A library reviewer reads each submission, confirms the MDE practice tags, and adds it to the library. Fields marked <span style="color:var(--p5)">*</span> are required.</p>
+      <div class="subwrap">
+        <form id="subForm" class="form" novalidate>
+          <div id="modeBanner"></div>
+          <fieldset>
+            <legend>The lesson</legend>
+            <div class="field" data-f="title">
+              <label class="lab" for="s-title">Lesson title<span class="req">*</span></label>
+              <input type="text" id="s-title" maxlength="120" placeholder="e.g., AI-Supported Reading Fluency Practice">
+            </div>
+            <div class="field" data-f="desc">
+              <label class="lab" for="s-desc">What happens in the lesson, and how is AI used?<span class="req">*</span></label>
+              <textarea id="s-desc" maxlength="3000" placeholder="Grade and subject, what students do, which AI tool is used and for what, and what the teacher does with the results."></textarea>
+              <p class="hint">Two short paragraphs work well. Leave a blank line between paragraphs.</p>
+            </div>
+            <div class="field">
+              <label class="lab" for="s-bent">Benefits for teachers</label>
+              <textarea id="s-bent" maxlength="1500" style="min-height:76px" placeholder="One benefit per line"></textarea>
+            </div>
+            <div class="field">
+              <label class="lab" for="s-bens">Benefits for students</label>
+              <textarea id="s-bens" maxlength="1500" style="min-height:76px" placeholder="One benefit per line"></textarea>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Who it's for</legend>
+            <div class="field" data-f="grades">
+              <span class="lab" id="lab-grades">Grade levels<span class="req">*</span></span>
+              <div class="cb-grid" id="s-grades" role="group" aria-labelledby="lab-grades"></div>
+            </div>
+            <div class="field" data-f="subjects">
+              <span class="lab" id="lab-subj">Subject areas<span class="req">*</span></span>
+              <div class="cb-grid" id="s-subjects" role="group" aria-labelledby="lab-subj"></div>
+              <input type="text" id="s-subj-other" maxlength="80" placeholder="Other subject (optional)" aria-label="Other subject">
+            </div>
+            <div class="field" data-f="role">
+              <span class="lab" id="lab-role">Who uses the AI?<span class="req">*</span></span>
+              <div class="cb-grid" role="radiogroup" aria-labelledby="lab-role">
+                <label><input type="radio" name="s-role" id="s-role-student" value="Student"> Students use AI</label>
+                <label><input type="radio" name="s-role" id="s-role-educator" value="Educator"> Teacher uses AI</label>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Tools and materials</legend>
+            <div class="field">
+              <span class="lab" id="lab-tools">AI tools used</span>
+              <div class="cb-grid" id="s-tools" role="group" aria-labelledby="lab-tools"></div>
+              <input type="text" id="s-tools-other" maxlength="160" placeholder="Other tools, separated by commas" aria-label="Other tools">
+            </div>
+            <div class="field" data-f="res">
+              <span class="lab">Lesson materials<span class="req">*</span></span>
+              <p class="hint">Add at least one link. For Google Drive, set sharing to "Anyone with the link can view" so other teachers can open it.</p>
+              <div id="s-res" style="display:grid;gap:8px"></div>
+              <button type="button" class="linkbtn" id="addRes" style="justify-self:start">+ Add another link</button>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>MDE Essential AI Practices</legend>
+            <p class="hint" style="margin-top:4px">Mark how clearly your lesson shows each practice. A reviewer will confirm these before the lesson goes live.</p>
+            <div id="s-prac"></div>
+            <div class="field">
+              <label class="lab" for="s-ev">How does the lesson show these practices?</label>
+              <textarea id="s-ev" maxlength="1500" style="min-height:76px" placeholder="e.g., Students check AI answers against the textbook before using them. No student names are entered into the tool."></textarea>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>About you</legend>
+            <div class="field" data-f="name">
+              <label class="lab" for="s-name">Your name<span class="req">*</span></label>
+              <input type="text" id="s-name" maxlength="80" autocomplete="name">
+            </div>
+            <div class="field">
+              <label class="lab" for="s-arole">Your role</label>
+              <select id="s-arole">
+                <option>Teacher Ambassador</option>
+                <option>AI Ambassador</option>
+                <option>Teacher Contributor</option>
+                <option>Administrator</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="lab" for="s-school">School or district</label>
+              <input type="text" id="s-school" maxlength="120" autocomplete="organization">
+            </div>
+            <div class="field">
+              <label class="lab" for="s-email">Email for follow-up questions</label>
+              <input type="email" id="s-email" maxlength="120" autocomplete="email">
+              <p class="hint">Only library reviewers see this. It is not shown in the library.</p>
+            </div>
+          </fieldset>
+
+          <div class="field" data-f="consent">
+            <label class="consent"><input type="checkbox" id="s-consent"> <span>I have permission to share these materials, and they contain no student names, photos, or other personal information.<span class="req" style="color:var(--p5)">*</span></span></label>
+          </div>
+          <div class="actions">
+            <button type="submit" class="btn" id="subBtn">Submit lesson</button>
+            <button type="button" class="btn ghost" id="resetBtn">Clear form</button>
+          </div>
+          <div id="formMsg" aria-live="polite"></div>
+        </form>
+
+        <aside class="subside">
+          <div class="sidebox">
+            <h3>What makes a strong exemplar</h3>
+            <ul>
+              <li>A clear classroom need the AI helps with</li>
+              <li>A step where the teacher or students check the AI's output</li>
+              <li>No student personal information entered into AI tools</li>
+              <li>Materials another teacher could pick up and use</li>
+            </ul>
+          </div>
+          <div class="sidebox" id="mineBox" hidden>
+            <h3>Your submissions</h3>
+            <div class="mine" id="mine"></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="view-review" hidden>
+      <h2 class="section-h">Review submissions</h2>
+      <p class="intro">Only library editors see this tab. Open a submission, confirm or adjust its MDE practice ratings, then add it to the library or decline it with a note to the submitter.</p>
+      <div class="rvbar chips" id="rvBar"></div>
+      <div class="rvlist" id="rvList"></div>
+    </section>
+
+    <section id="view-roadmap" hidden>
+      <h2 class="section-h">Coming to the library</h2>
+      <p class="intro">The library starts with classroom lessons. These collections are next on the list. Each will use the same browse filters and MDE practice tags.</p>
+      <div class="road" id="road"></div>
+      <div class="note">
+        <h3>Have feedback on this prototype?</h3>
+        <p>UI prototypes and the alignment reference structure are being emailed to the AI Ambassadors for review before the next meeting. Watch for that email and reply with what works, what's missing, and what would make this easier to use with colleagues.</p>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer><div class="wrap">Practice names and descriptions from MDE Essential AI Practices. Lessons contributed by Michigan AI Ambassadors and partner teachers. Resource links open in Google Drive; some may require a district sign-in.</div></footer>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="dTitle" hidden></aside>
+
+<script type="application/json" id="lessonData">[{"id": 1, "title": "AI-Powered Book Suggestions for Students", "desc": ["In this ELA/Social Studies exemplar across grades 6–12, a SchoolAI chatbot acts as a digital librarian. Teachers upload their library’s book catalog so students can ask questions about interests and genres, and the AI recommends suitable titles.", "The AI conversation fosters student agency and curiosity, while teachers can review chat histories to learn about students’ reading preferences and guide them. The tool saves time and compensates for limited library staff, making book selection more personalized and engaging."], "ben": {"t": ["An assistant to help point students in a direction of what might be a good read for them"], "s": ["Allows the students a space to ask questions and explore their interests to help find appropriate reading material"]}, "grades": ["6th", "7th", "8th", "9th", "10th", "11th", "12th"], "subjects": ["ELA", "Social Studies"], "role": "Student", "tools": [{"l": "SchoolAI", "u": "https://schoolai.com"}, {"l": "MagicSchool", "u": "https://www.magicschool.ai"}, {"l": "Brisk", "u": "https://briskteaching.com"}], "authors": [["Peter Milne", "Teacher Ambassador"]], "res": [{"l": "Video", "u": "https://drive.google.com/open?id=1zxCrACTtG26T4flocevVdrEZx6omy7srld8JvmJj11E"}], "formats": ["Video", "Image"], "p": [2, 0, 0, 1, 1, 0], "ev": "Chatbot fills a defined need (limited library staff) for book selection. Teachers can review chat histories to guide students. Recommendations are personalized to each student's interests."}, {"id": 2, "title": "AI-Driven Book Selection for 6th Grade Readers", "desc": ["In this sixth‑grade ELA class, Magicschool AI provides personalized book recommendations as an early-finisher activity. Students enter interests, genres and Lexile ranges into a chat interface, and the AI suggests titles from the classroom library.", "The tool keeps students engaged while they practice digital literacy skills and choose texts that match their preferences. The teacher can review recommendations and monitor students’ selections without sacrificing instructional time."], "ben": {"t": ["The teacher is able to build a room for students to access to help suggest book title in genre's of interest", "Benefits to the teacher include students highly engaged in the activity of choosing a book, and lexile scores can be added to help students choose books in their reading range"], "s": ["Students responded incredibly to this", "Students were able to use AI tools in a safe scenario and work on digital literacy skills", "It also allowed the teacher to be able to gauge student interest in  class selected texts"]}, "grades": ["6th"], "subjects": ["ELA"], "role": "Student", "tools": [{"l": "MagicSchool", "u": "https://www.magicschool.ai"}, {"l": "SchoolAI", "u": "https://schoolai.com"}], "authors": [["Tom Durbin", "Teacher Ambassador"]], "res": [{"l": "Lesson Plan Document", "u": "https://drive.google.com/open?id=1etZygb6yhbWjnUJ4NGd24rF0BtfbT2c4ahtv2dCt7EM"}], "formats": ["Lesson Plan Document", "Written Reflection"], "p": [2, 1, 1, 2, 2, 0], "ev": "Clear early-finisher purpose. Teacher-built room gives students a 'safe scenario' for AI use, though data protections aren't specified. Students practice digital literacy. Teacher reviews recommendations and monitors selections. Lexile ranges match books to each reader's level."}, {"id": 3, "title": "AI-Driven Feedback for Student Essays", "desc": ["In this 9th grade ELA exemplar, the teacher used Fobizz’s AI feedback tool to support students writing essays for the World Food Prize competition. Students drafted their essays in Google Docs and submitted them for AI-generated feedback aligned to rubric criteria.", "The AI provided immediate, criterion‑referenced comments so students could revise before meeting with the teacher. During conferences, the teacher discussed both the students’ writing and the AI’s suggestions, helping learners critically evaluate AI feedback and improve their work."], "ben": {"t": ["The teacher had complete control of the criteria the AI was generating feedback on", "She was able to meet with each student to evaluate the quality of the AI feedback and offer her own feedback"], "s": ["Students received immediate feedback from AI and could move along in the assignment at their own pace without having to wait for teacher feedback before advancing", "When they did have a turn with their teacher, it was not only to improve their writing, but to think critically about the AI feedback they received"]}, "grades": ["9th"], "subjects": ["ELA"], "role": "Student", "tools": [{"l": "Fobizz", "u": "https://fobizz.com"}, {"l": "MagicSchool", "u": "https://www.magicschool.ai"}, {"l": "Brisk", "u": "https://briskteaching.com"}, {"l": "SchoolAI", "u": "https://schoolai.com"}], "authors": [["Jarrah Latz", "AI Ambassador"], ["Dana B., 9th Grade ELA", "Teacher Contributor"], ["Ovid Elsie Area Schools", ""]], "res": [{"l": "Video", "u": "https://drive.google.com/open?id=12LBJun9NNQkiAzIOiXCk8ih5nF0QKorA"}], "formats": ["Video"], "p": [2, 0, 1, 2, 1, 0], "ev": "Teacher controls the rubric criteria the AI uses. In conferences, students critically evaluate the quality of the AI feedback alongside teacher feedback. Self-paced revision lets students move ahead without waiting."}, {"id": 4, "title": "AI-Assisted Differentiation for High School ELA Reading", "desc": ["This high school co‑taught ELA class leverages Notebook LM to differentiate a reading and analysis task across multiple ability levels. The teacher uploads grade‑level texts and uses AI to generate scaffolded materials such as summaries, guiding questions and modified assignments.", "By instantly creating adapted resources, the teacher can meet diverse needs within a single classroom, freeing time for individualized support. Although the AI produced materials for teacher use, students benefit through accessible content and increased independence."], "ben": {"t": ["Saves time, creates differentiated resources with the click of a button"], "s": ["This lesson was teacher focused, but the same AI could be used by students who learn to accommodate their own needs"]}, "grades": ["9th", "10th", "11th"], "subjects": ["ELA"], "role": "Student", "tools": [{"l": "Notebook LM", "u": "https://notebooklm.google.com"}], "authors": [["Jill Soper", "Teacher Ambassador"]], "res": [{"l": "Image", "u": "https://drive.google.com/open?id=1xB4-bRNPCI-Dn_-l5l2TvLmWjZXMlJXL6m5PU93dSDI"}, {"l": "Resource 2", "u": "https://drive.google.com/open?id=1iRS-W83uZIRjZ3kigD7ySnr56MhabpOV"}], "formats": ["Image"], "p": [2, 0, 0, 1, 2, 0], "ev": "Teacher uses NotebookLM to create scaffolded summaries, guiding questions and modified assignments for multiple ability levels. All AI materials pass through the teacher before reaching students."}, {"id": 5, "title": "AI-Powered Text Leveling for Differentiated Reading", "desc": ["This tutorial demonstrates how teachers can use AI tools like MagicSchool, Brisk and ChatGPT to adapt challenging texts for students with diverse reading levels. After checking a text’s readability, the teacher prompts AI to rewrite the passage at appropriate levels and generate comprehension questions.", "The process saves time and supports differentiation by producing multiple versions of the same content. Teachers can also use the tools to create audio, translation or vocabulary supports so all students can access grade‑level material."], "ben": {"t": ["Saving time, differentiation, supporting diverse learners"], "s": ["accessible content both in comprehension and availability"]}, "grades": ["3rd"], "subjects": ["ELA"], "role": "Student", "tools": [{"l": "MagicSchool", "u": "https://www.magicschool.ai"}, {"l": "Brisk", "u": "https://briskteaching.com"}, {"l": "ChatGPT", "u": "https://chat.openai.com"}, {"l": "SchoolAI", "u": "https://schoolai.com"}, {"l": "Gemini", "u": "https://gemini.google.com"}, {"l": "Claude", "u": "https://claude.ai"}], "authors": [["Betsy Springer", "Teacher Ambassador"]], "res": [{"l": "Video", "u": "https://drive.google.com/open?id=1JyVA4Ng5syTmV2T2q_ovZbbT-SpptMdnBCHgdHZ3HdQ"}], "formats": ["Video", "Image", "Written Reflection"], "p": [2, 0, 0, 0, 2, 0], "ev": "Teacher checks readability, then has AI rewrite texts at multiple levels with audio, translation and vocabulary supports so all students can access grade-level content."}, {"id": 6, "title": "Using ChatGPT as a Lesson-Planning Thought Partner", "desc": ["An elementary teacher used ChatGPT as a collaborative brainstorming partner to design engaging lesson plans for grades 3–5 science and social studies. Starting with a simple prompt about teaching Oklahoma history, she iteratively refined the prompt based on ChatGPT’s suggestions.", "Through this back‑and‑forth, the AI generated differentiated activities, behavior management ideas and scaffolds for diverse learners. The process streamlined planning while sparking new instructional strategies that the teacher adapted and implemented in class."], "ben": {"t": ["Thought Partner, differentiation, lesson planning"], "s": ["Support for diverse learners, exciting lessons"]}, "grades": ["3rd", "4th", "5th"], "subjects": ["Science", "Social Studies"], "role": "Student", "tools": [{"l": "ChatGPT", "u": "https://chat.openai.com"}, {"l": "Gemini", "u": "https://gemini.google.com"}, {"l": "Claude", "u": "https://claude.ai"}], "authors": [["Betsy Springer", "Teacher Ambassador"]], "res": [{"l": "Lesson Plan Document", "u": "https://drive.google.com/open?id=1goqx_VOiKhldP_fkVb6tHqlmCzaPvAS1pIeu9mkquDU"}], "formats": ["Lesson Plan Document", "Video"], "p": [2, 0, 1, 2, 2, 0], "ev": "Teacher iteratively refines prompts (building prompting skill), then adapts AI suggestions before implementing them. AI output includes differentiated activities and scaffolds for diverse learners."}, {"id": 7, "title": "Integrating AI into Art Projects", "desc": ["This lesson invites secondary art students to explore various applications of AI in creative projects. Students examine how tools like Adobe Firefly, Quillbot and Ask AI can support idea generation, image creation and editing.", "By experimenting with AI and reflecting on its benefits and limitations, learners develop digital art skills and critical thinking. Teachers guide discussions around ethical use and creative control, positioning AI as a tool rather than a replacement for human creativity."], "ben": {"t": ["This teacher is teaching students about the uses and limitations of ai"], "s": ["Students learn about the benefits and limitations of AI"]}, "grades": ["9th", "10th", "11th", "12th"], "subjects": ["Music or Arts"], "role": "Student", "tools": [{"l": "Adobe Firefly", "u": "https://firefly.adobe.com"}, {"l": "Canva Magic Studio", "u": "https://www.canva.com/features/magic-studio"}, {"l": "MagicSchool", "u": "https://www.magicschool.ai"}], "authors": [["Betsy Springer", "Teacher Ambassador"]], "res": [{"l": "Lesson Plan Document", "u": "https://drive.google.com/open?id=1gmB19UmxJ96sonvUyrIavy65BH4jZPqEwyk9WXjaXlY"}], "formats": ["Lesson Plan Document", "Image"], "p": [2, 0, 2, 2, 0, 0], "ev": "Students experiment with AI tools and reflect on benefits and limitations. Teacher-led discussions on ethical use and creative control position AI as a tool, not a replacement for human creativity."}, {"id": 8, "title": "AI-Generated Backdrops for Theater Productions", "desc": ["Middle and high school performing arts students use Fobizz AI image generators to create custom digital backdrops for their theatre productions. By crafting detailed text prompts, students generate scenes such as forests, cityscapes and fantasy settings.", "The class then imports the images into Canva’s Magic Studio for finishing touches and projection. This approach eliminates the cost of purchasing slide decks and teaches students how to collaborate with AI to realize artistic visions."], "ben": {"t": ["The biggest benefit for the teacher is not having to purchase the projection slides for each production"], "s": ["The students learned how to prompt with detail to get the images they wanted and then learned how to edit them to get a perfect backdrop"]}, "grades": ["6th", "7th", "8th", "9th", "10th", "11th", "12th"], "subjects": ["Performing Arts"], "role": "Student", "tools": [{"l": "Fobizz Image Generators", "u": "https://fobizz.com"}, {"l": "Canva Magic Studio", "u": "https://www.canva.com/features/magic-studio"}, {"l": "Adobe Firefly", "u": "https://firefly.adobe.com"}, {"l": "MagicSchool", "u": "https://www.magicschool.ai"}], "authors": [["Jarrah Latz", "AI Ambassador"], ["Mandy B., Middle School & High School Performing Arts", "Teacher Contributor"], ["Ovid Elsie Area Schools", ""]], "res": [{"l": "Video", "u": "https://drive.google.com/open?id=1EwxpJU5KkJN9aonmnCVD2PWuX70Ew_YO"}], "formats": ["Video"], "p": [2, 0, 2, 1, 0, 0], "ev": "Clear production need (replaces purchased projection slides). Students learn to write detailed prompts, then refine the images themselves in Canva."}, {"id": 9, "title": "Exploring Schoolyard Biodiversity with Google Lens", "desc": ["In this cross‑curricular science and ELA lesson, students use the Google Lens app to investigate biodiversity on their school grounds. Working from a choice board, they identify plants, insects, rocks and small animals, then research their ecological roles.", "The activity combines outdoor exploration with digital literacy and universal design for learning. Students document their findings in formats such as slides, comics or podcasts, while teachers scaffold research and vocabulary. Required devices and connectivity are considerations."], "ben": {"t": ["Easy to implement lesson: Clear steps and materials make planning simple and efficient"], "s": ["Hands on outdoor learning: Students actively explore their environment, boosting engagement and curiosity", "Use of technology: Google Lens helps develop digital literacy while identifying real"]}, "grades": ["4th", "5th", "6th", "7th", "8th", "9th", "10th", "11th", "12th"], "subjects": ["ELA", "Science"], "role": "Student", "tools": [{"l": "Google Lens", "u": "https://lens.google"}], "authors": [["Michelle Gierman", "Teacher Ambassador"]], "res": [{"l": "Lesson Plan Document", "u": "https://drive.google.com/open?id=1JG_TpQJTuqidrfJYfxXoZjTvSWO4BCVU"}], "formats": ["Lesson Plan Document", "Video", "Image", "Written Reflection", "Case Study"], "p": [2, 0, 1, 0, 2, 0], "ev": "Purposeful outdoor investigation that builds digital literacy with an AI vision tool. UDL choice board, multiple output formats and scaffolded research/vocabulary; device and connectivity access is acknowledged."}, {"id": 10, "title": "AI-Enhanced I, Robot Cybersecurity Lesson", "desc": ["In a high school cybersecurity course, students examine ethical and security issues related to artificial intelligence and robotics using the film I, Robot. The teacher employs ChatGPT and Brisk to develop detailed lesson plans, worksheets and scene‑specific discussion prompts.", "Students watch film clips, analyze the Three Laws of Robotics and debate the societal implications of AI. The AI tools save planning time by generating resources and quizzes, though timestamps needed minor adjustments."], "ben": {"t": ["Time saving", "developed details, worksheets, lesson plans, etc"], "s": ["They used a Bot to learn about the 3 Laws of Robotics"]}, "grades": ["9th", "10th", "11th", "12th"], "subjects": ["Computer Science-AI"], "role": "Student", "tools": [{"l": "ChatGPT", "u": "https://chat.openai.com"}, {"l": "Brisk", "u": "https://briskteaching.com"}, {"l": "Gemini", "u": "https://gemini.google.com"}, {"l": "Claude", "u": "https://claude.ai"}, {"l": "MagicSchool", "u": "https://www.magicschool.ai"}, {"l": "SchoolAI", "u": "https://schoolai.com"}], "authors": [["Randi Watts", "Teacher Ambassador"]], "res": [{"l": "Lesson Plan Document", "u": "https://drive.google.com/open?id=1sblc6_mJx_nhp01BtVgBgxYzPRxBEGI_"}, {"l": "Resource 2", "u": "https://drive.google.com/open?id=1I0Zk9fIRv-sRgbEePG4KSVn9shumr8qG"}, {"l": "Resource 3", "u": "https://drive.google.com/open?id=1vbN2CrcfwsNyCk11aOk-fBSgn-dNl50M"}, {"l": "Resource 4", "u": "https://drive.google.com/open?id=16nOnsPdqi8S9_51OcewlGNbJF-m8_RpD"}, {"l": "Resource 5", "u": "https://drive.google.com/open?id=1w7rTJFescV3uY3ygn378ckuxXctVwx-l"}, {"l": "Resource 6", "u": "https://drive.google.com/open?id=1vlkV37BZdaNfU0DT169EdcGNkGacgo-R"}], "formats": ["Lesson Plan Document"], "p": [2, 0, 2, 2, 0, 0], "ev": "Students analyze ethical and security issues of AI and debate its societal implications. Teacher caught and corrected AI errors (timestamps needed adjustment)."}, {"id": 11, "title": "AI-Enhanced Grammar Lesson: Mastering Colons", "desc": ["This exemplar features a concise AI‑generated presentation that teaches students how to use colons correctly. Using Brisk, the teacher quickly created slides explaining how colons introduce clarifications and lists, complete with examples and interactive practice.", "The clear visuals and guided practice engage students in a traditionally dry grammar topic. The AI‑assisted process ensures accuracy and allows the teacher to focus on facilitation while students benefit from accessible explanations."], "ben": {"t": ["The benefit of using Brisk (AI tool) for the teacher in creating the Colons presentation was primarily efficiency, accuracy, and instructional support", "Brisk helped the teacher quickly generate clear, standards", "aligned content with examples, explanations, and practice questions that reinforce correct grammar usage"], "s": ["The benefit of using AI (via Brisk) for the students was improved clarity, engagement, and accessibility", "The presentation included clear explanations, visual examples, and interactive practice, helping students better understand and apply grammar rules", "Brisk also supported different learning styles and allowed for content to be tailored to student needs, making the lesson more effective and student"]}, "grades": ["9th", "10th", "11th", "12th"], "subjects": ["ELA"], "role": "Student", "tools": [{"l": "Brisk", "u": "https://briskteaching.com"}, {"l": "MagicSchool", "u": "https://www.magicschool.ai"}, {"l": "SchoolAI", "u": "https://schoolai.com"}], "authors": [["Randi Watts", "AI Ambassador"], ["Rebecca Bortnichak, ELA", "Teacher Contributor"]], "res": [{"l": "Presentation", "u": "https://drive.google.com/open?id=1vryIeFjO9QY243xT9Tieck_3F5lt7duS"}], "formats": ["Presentation"], "p": [2, 0, 0, 0, 1, 0], "ev": "Teacher uses Brisk to build an engaging presentation on a specific grammar skill. Benefits cite accessibility and content tailored to student needs."}, {"id": 12, "title": "Physics Escape Room: Impulse-Momentum with AI", "desc": ["To make impulse and momentum practice more engaging, a high school physics teacher used ChatGPT to help design a digital escape room. The AI generated a narrative scenario, clues and questions that students solve through a Google Form.", "As learners answer conceptual and mathematical problems, they uncover codes to advance through the “lab”. The gamified format motivates reluctant students and reveals misconceptions, while the AI streamlines the creation of puzzles and storylines."], "ben": {"t": ["Quickly come up with a scenario, questions, and formatting help for a digital escape room"], "s": ["Students are presented with an engaging lesson to practice their skills and identify knowledge gaps"]}, "grades": ["9th", "10th", "11th", "12th"], "subjects": ["Science"], "role": "Student", "tools": [{"l": "ChatGPT", "u": "https://chat.openai.com"}, {"l": "Gemini", "u": "https://gemini.google.com"}, {"l": "Claude", "u": "https://claude.ai"}], "authors": [["Keith Mclaughlin", "Teacher Ambassador"]], "res": [{"l": "Lesson Plan Document", "u": "https://drive.google.com/open?id=1PsM6LHX_9smbrAHmEGtFiyAqeuGHa6TuICnc_5oMPZE"}, {"l": "Resource 2", "u": "https://drive.google.com/open?id=1vReJ5DjGcgcUUqtT1Ct5qHZy4dgwe5izzS-5MYs7buk"}], "formats": ["Lesson Plan Document"], "p": [2, 0, 0, 0, 1, 0], "ev": "Gamified practice to motivate reluctant students; reveals misconceptions and knowledge gaps the teacher can address."}, {"id": 13, "title": "AI-Assisted Water Cycle Review with Visual Notes", "desc": ["To review the water cycle, a teacher leveraged Napkin AI to generate key terms and visuals for each stage. Students worked in groups to prompt the AI for images and notes, then compiled them into a collective visual study guide.", "The activity increased engagement, reduced behavior issues and allowed students at different levels to contribute through text and images. AI‑supported visuals shifted the focus from memorization to discussion and conceptual understanding."], "ben": {"t": ["Class is engaged, fewer behavior disruptions, Easy prep once the AI literacy skill have been taught, Differentiation  for diverse learning needs by giving text and visuals"], "s": ["High engagement with choice and structure, focus was not on memorizing facts but on the discussion after learning"]}, "grades": ["4th"], "subjects": ["Science"], "role": "Student", "tools": [{"l": "Napkin AI", "u": "https://www.napkin.one"}, {"l": "Canva Magic Studio", "u": "https://www.canva.com/features/magic-studio"}, {"l": "MagicSchool", "u": "https://www.magicschool.ai"}], "authors": [["Jill Soper", "Teacher Ambassador"]], "res": [{"l": "Lesson Plan Document", "u": "https://drive.google.com/open?id=10IVaAAmvPIyqyDbcgt_PRLDhG8dYUtf5"}], "formats": ["Lesson Plan Document"], "p": [2, 0, 2, 0, 2, 0], "ev": "Students prompt the AI themselves after AI literacy skills were explicitly taught. Text-plus-visual format lets students at different levels contribute."}, {"id": 14, "title": "AI-Guided Feedback for Digital Storytelling Drafts", "desc": ["In a 12th‑grade narrative writing unit, the teacher used Magic School AI’s writing feedback tool to create customizable bots that give targeted feedback. Students drafted digital stories and uploaded them to the AI tool for comments on organization, voice and mechanics.", "Immediate, personalized feedback kept students moving through the drafting process without waiting for teacher input. During conferences, the teacher reviewed the AI comments with students, emphasizing that AI is a supportive tool rather than the final authority."], "ben": {"t": ["AI allowed the teacher to customize the type of feedback and guidance that his students receive and to target specific focus areas that will be assessed in terms of their writing", "It also gave him a baseline he can build upon with his own ideas or suggestions for their writing"], "s": ["AI provided the teacher’s students with timely feedback rather than having to wait for individual written feedback/ in", "person advising from him", "The feedback they receive points out the strengths of their writing as well as areas that need improvement, and can give them specific guidance and suggestions for how to proceed or revise their current drafts"]}, "grades": ["12th"], "subjects": ["ELA"], "role": "Student", "tools": [{"l": "MagicSchool", "u": "https://www.magicschool.ai"}, {"l": "Brisk", "u": "https://briskteaching.com"}, {"l": "SchoolAI", "u": "https://schoolai.com"}], "authors": [["Judy Bowling", "AI Ambassador"], ["Mike Gearns, English 12, Belleville High School", "Facilitating Teacher"]], "res": [{"l": "Video", "u": "https://drive.google.com/open?id=16z1ysxHQIzad7-TBHEXDbW2c4ntl656z"}], "formats": ["Video"], "p": [2, 0, 1, 2, 1, 0], "ev": "Teacher customizes feedback bots to targeted assessment areas, then reviews AI comments with students in conferences, framing AI as a support rather than the final authority. Timely, personalized feedback."}, {"id": 15, "title": "AI-Generated Informational Writing and Feedback", "desc": ["This lesson uses Curipod to generate an informational passage on a class‑relevant topic and a slide deck guiding students through reading, discussing and writing about the text. After writing a response, students receive AI “glow and grow” feedback with a score.", "The AI‑generated content allows the teacher to customize topics and provides immediate feedback so students can revise. Tailoring the passage to student interests boosts engagement while integrating reading and writing skills in a single lesson."], "ben": {"t": ["The passage can be on any topic", "The teacher can tailor the topic to something relevant from class", "Then the AI creates a slide deck to guide the lesson"], "s": ["Since the teacher can prompt the AI to generate an informational passage tailored to the class, he’s able to choose topics that genuinely interest students", "After reading the passage, students brainstormed together and voted through an interactive slide deck", "At the end, they had the opportunity to write authentic responses and receive immediate AI feedback"]}, "grades": ["4th"], "subjects": ["ELA"], "role": "Student", "tools": [{"l": "Curipod", "u": "https://www.curipod.com"}, {"l": "MagicSchool", "u": "https://www.magicschool.ai"}, {"l": "Brisk", "u": "https://briskteaching.com"}], "authors": [["Judy Bowling", "AI Ambassador"], ["Aaron Huntington, 4th Grade, Arno Elementary, Allen Park", "Facilitating Teacher"]], "res": [{"l": "Image", "u": "https://drive.google.com/open?id=1MaC9JDgbkrLG9mYsMeJbhnm4nmM9vfMj"}], "formats": ["Image"], "p": [2, 0, 0, 0, 1, 0], "ev": "AI generates a passage tailored to class interests plus a guided slide deck. Students get immediate glow-and-grow feedback to revise."}, {"id": 16, "title": "Chatting with Book Characters via AI", "desc": ["Fourth‑grade students engage in authentic writing by chatting with a character from a book using Brisk. Students craft messages to the character, and the AI responds in the character’s voice, steering the conversation based on comprehension.", "The activity requires minimal setup and offers the teacher insight into student understanding while motivating students to write more. Many students continued conversations independently, making it both engaging and informative."], "ben": {"t": ["One of the benefits as a teacher was how easy it was to create an engaging lesson with little effort", "The second benefit was checking the comprehension of students while watching them chat with the main character", "Their dialogue provided valuable insights into their understanding"], "s": ["Students had time to write in a more authentic way and get immediate feedback from the AI", "They genuinely enjoyed the activity", "Many students went back and continued the chat during their own free time"]}, "grades": ["4th"], "subjects": ["ELA"], "role": "Student", "tools": [{"l": "Brisk", "u": "https://briskteaching.com"}, {"l": "MagicSchool", "u": "https://www.magicschool.ai"}, {"l": "SchoolAI", "u": "https://schoolai.com"}], "authors": [["Judy Bowling", "AI Ambassador"], ["Aaron Huntington, 4th Grade, Arno Elementary, Allen Park", "Facilitating Teacher"]], "res": [{"l": "Image", "u": "https://drive.google.com/open?id=1MiTDncu_9FvC7xQ3Us0OWIRmrHylbdqt"}], "formats": ["Image"], "p": [2, 0, 0, 1, 0, 0], "ev": "Authentic writing practice tied to comprehension. Teacher monitors the chats for insight into student understanding."}, {"id": 17, "title": "AI-Generated 3D Designs with ChatGPT and Bambu Studio", "desc": ["Junior high STEM students combine ChatGPT with Bambu Studio to create AI‑generated images for 3D printing projects. Students write prompts to generate designs, then bring them into the 3D printing software for fabrication.", "The lesson introduces students to prompt engineering and demonstrates real‑world applications of AI in design and manufacturing. It provides an accessible entry point to AI while encouraging creativity and hands‑on learning."], "ben": {"t": ["Students could take images of interest and be introduced to how AI can create images with a well written prompt"], "s": ["Students could use AI under the guidance of the teacher", "The also see application of AI tools for creating and learning"]}, "grades": ["7th", "8th"], "subjects": ["Stem - PLTW"], "role": "Student", "tools": [{"l": "ChatGPT", "u": "https://chat.openai.com"}, {"l": "Bambu Studio", "u": "https://bambulab.com"}], "authors": [["Tom Durbin", "Teacher Ambassador"]], "res": [{"l": "Lesson Plan Document", "u": "https://drive.google.com/open?id=16XjiVy2eplIKbM0eHy4QUSRBHnFr9WTk"}], "formats": ["Lesson Plan Document"], "p": [2, 0, 2, 1, 0, 0], "ev": "Introduces prompt engineering and real-world AI applications in design and manufacturing. Students use AI under teacher guidance."}, {"id": 18, "title": "AI-Generated Entrance Ticket Quizzes for Lecture Review", "desc": ["In this science class, the teacher records lectures and posts them to YouTube. Before the next lesson, they use Brisk to automatically generate a three‑question quiz from the video as an entrance ticket.", "The quick quiz reactivates prior knowledge and provides immediate formative data without significant teacher effort. Students benefit from a structured review that bridges lessons and keeps them accountable for video content."], "ben": {"t": ["Quickly create and distribute a quiz for students without a lot of teacher effort"], "s": ["Fast way to re", "engage with previous material"]}, "grades": ["11th", "12th"], "subjects": ["Science"], "role": "Student", "tools": [{"l": "Brisk", "u": "https://briskteaching.com"}, {"l": "MagicSchool", "u": "https://www.magicschool.ai"}, {"l": "SchoolAI", "u": "https://schoolai.com"}], "authors": [["Keith Mclaughlin", "Teacher Ambassador"]], "res": [{"l": "Video", "u": "https://drive.google.com/open?id=1glMINmKwq40LbowVsUKfjb2READcyu-o"}], "formats": ["Video"], "p": [2, 0, 0, 0, 1, 0], "ev": "Quick quiz reactivates prior knowledge and gives immediate formative data on who needs review."}, {"id": 19, "title": "AI-Assisted Brainstorming and Prewriting on Heroism", "desc": ["For an 8th‑grade Language & Literature unit on heroism, students use MagicStudentAI and SchoolAI to brainstorm and organize ideas before writing. AI tools prompt students with questions and graphic organizers to deepen their thinking.", "By modeling ethical and effective AI use, the teacher supports differentiation and digital literacy. Students receive personalized guidance that boosts engagement and helps them generate richer ideas for their essays."], "ben": {"t": ["Differentiation, increased engagement, time efficiency, ethical AI modeling"], "s": ["Idea generation support, personalized guidance, improved pre", "writing, digital literacy skills"]}, "grades": ["8th"], "subjects": ["ELA"], "role": "Student", "tools": [{"l": "MagicStudentAI", "u": "https://magicstudent.ai"}, {"l": "SchoolAI", "u": "https://schoolai.com"}, {"l": "MagicSchool", "u": "https://www.magicschool.ai"}, {"l": "Brisk", "u": "https://briskteaching.com"}, {"l": "Fobizz", "u": "https://fobizz.com"}], "authors": [["Jill Hill", "Teacher Ambassador"]], "res": [{"l": "Lesson Plan Document", "u": "https://drive.google.com/open?id=1tY0z0MhmhVWuac_LI5owxgWFgkLvj8cWlBh9TQhArdo"}], "formats": ["Lesson Plan Document"], "p": [2, 0, 2, 1, 2, 0], "ev": "Teacher models ethical and effective AI use. AI prompts students with questions and organizers to deepen their own thinking rather than writing for them. Personalized guidance supports differentiation."}, {"id": 20, "title": "AI-Supported Reading Fluency Practice", "desc": ["In a first‑grade ELA classroom, the teacher uses Snorkl to generate leveled fluency passages and provide instant feedback on students’ oral reading. Students read AI‑generated passages aloud, receiving gamified scores and suggestions for improvement.", "The tool saves planning time and delivers individualized data, allowing the teacher to adjust instruction and groupings. Students are motivated by immediate feedback and progress tracking, making fluency practice more engaging and effective."], "ben": {"t": ["The teacher was able to generate leveled, engaging fluency passages within seconds, saving valuable planning time", "AI feedback tools provided performance insights for each student, allowing the teacher to adjust instruction and groupings based on real", "time data"], "s": ["Students received immediate, personalized feedback on their reading fluency", "The gamified interface increased motivation, and students were able to track their progress and set goals", "The tool promoted independent practice while still aligning with teacher"]}, "grades": ["1st"], "subjects": ["ELA"], "role": "Student", "tools": [{"l": "Snorkl", "u": "https://www.google.com/search?q=Snorkl"}], "authors": [["Jennifer Lawson", "Teacher Ambassador"]], "res": [{"l": "Lesson Plan Document", "u": "https://docs.google.com/document/d/1NmMg-8lEJjZhvNiwSah62AL_MV4YeRSjduHjXl_uaAw/edit?usp=sharing"}], "formats": ["Lesson Plan Document"], "p": [2, 0, 0, 1, 2, 0], "ev": "Leveled passages and individualized fluency data. Teacher uses the AI data to adjust instruction and groupings."}, {"id": 21, "title": "AI Exploration Activity in Virtual Art Class", "desc": ["In this high school virtual art class assignment, students explore the capabilities of AI through hands-on tasks using platforms like Adobe Firefly and Ask.Ai. Students choose from interactive challenges such as generating and modifying images, answering questions, composing poetry and detecting AI-generated text.", "This exploratory lesson helps students understand AI's versatility in creative and analytical domains. By experimenting with different tools and reflecting on their experiences, learners gain insight into the benefits and limitations of AI while developing digital literacy skills."], "ben": {"t": ["Assists student understanding of AI's potential, enables an exploratory, low-prep lesson"], "s": ["Students learn about AI tools' capabilities and limitations through hands-on exploration"]}, "grades": ["9th", "10th", "11th", "12th"], "subjects": ["Music or Arts"], "role": "Student", "tools": [{"l": "Adobe Firefly", "u": "https://firefly.adobe.com"}, {"l": "Ask.Ai", "u": "https://ask.ai"}], "authors": [], "res": [{"l": "Lesson Plan Document", "u": "https://drive.google.com/open?id=1xQV3xVMI19q2IFdx7v5KLM9idpOkTjpG"}], "formats": ["Lesson Plan Document"], "p": [2, 0, 2, 2, 0, 1], "ev": "Hands-on challenges reveal AI capabilities and limitations. Students reflect on their experiences and practice detecting AI-generated text, which supports recognizing AI-made content."}, {"id": 22, "title": "AI-Generated Video Scripts for Virtual PE Classes", "desc": ["An elementary virtual PE teacher used ChatGPT to craft scripts for health and PE lessons delivered through Google Vids. After outlining the content at the appropriate comprehension level, she created slides and recorded videos to upload into the learning management system.", "The AI-assisted scripts broke complex topics into grade-appropriate explanations, saving preparation time and allowing the teacher to focus on engaging delivery while providing differentiated content for early readers."], "ben": {"t": ["AI quickly generates grade‑level video scripts for health and PE topics"], "s": ["Students receive differentiated video content with terms explained clearly for young learners"]}, "grades": ["Kindergarten", "1st", "2nd"], "subjects": ["Physical Education"], "role": "Educator", "tools": [{"l": "ChatGPT", "u": "https://chat.openai.com"}], "authors": [], "res": [{"l": "Video", "u": "https://drive.google.com/open?id=1wNblNhPshKDw7HY-QFaJGPteULk75igi"}], "formats": ["Video"], "p": [2, 0, 0, 1, 2, 0], "ev": "Teacher outlines content at the right comprehension level before AI drafts scripts, then builds the slides and records the videos herself. Content is differentiated for early readers."}, {"id": 23, "title": "AI-Generated Holiday Songs for AP Government", "desc": ["In this engaging AP Government lesson, students analyze the regime type and unique features of a country from the AP Comparative Government course and then use a large language model to write holiday-themed lyrics summarizing their understanding. Students craft prompts, generate song lyrics with AI and verify the accuracy before performing the songs.", "The activity combines content mastery with creative expression, motivating students to synthesize political concepts in a memorable format."], "ben": {"t": ["Enables a fun, low-prep lesson that increases engagement in AP Government"], "s": ["Provides a creative, memorable way to summarize regime types and features"]}, "grades": ["9th", "10th", "11th", "12th"], "subjects": ["Social Studies"], "role": "Student", "tools": [{"l": "ChatGPT", "u": "https://chat.openai.com"}, {"l": "Gemini", "u": "https://gemini.google.com"}, {"l": "Claude", "u": "https://claude.ai"}], "authors": [], "res": [{"l": "Lesson Plan Document", "u": "https://drive.google.com/open?id=1gYziVvMG_UIZrvGU_62mftq3VcYpXtNqrZIRGEJe6jM"}], "formats": ["Lesson Plan Document"], "p": [2, 0, 1, 2, 0, 0], "ev": "Students craft prompts, then verify the accuracy of AI-generated lyrics before performing them."}, {"id": 24, "title": "AI-Enhanced Black History Unit: Music and Civil Rights", "desc": ["This interdisciplinary unit introduces third‑grade students to Black history through jazz music and the contributions of Black leaders in civil rights, science and the arts. Students explore the history of jazz, analyze poetic devices in song lyrics, research notable Black figures and write bio poems. AI tools such as Magic School bots and writing feedback tools support research and offer targeted feedback on writing.", "The unit culminates in poetry anthologies and performances, connecting literature, music and history to foster cultural understanding and creativity."], "ben": {"t": ["Simplifies lesson planning with interactive research bots and writing feedback, allowing the teacher to focus on discussion and creativity"], "s": ["Provides curated information and immediate writing feedback, fostering deeper engagement and polished work"]}, "grades": ["3rd"], "subjects": ["ELA", "Social Studies", "Music or Arts"], "role": "Student", "tools": [{"l": "MagicSchool", "u": "https://www.google.com/search?q=Magic+School"}, {"l": "AI Writing Feedback Tools", "u": "https://www.google.com/search?q=AI%20Writing%20Feedback%20Tools"}, {"l": "Character and Research Bots", "u": "https://www.google.com/search?q=Character%20and%20Research%20Bots"}], "authors": [], "res": [{"l": "Lesson Plan Document", "u": "https://drive.google.com/open?id=1dmqZpGnHEkIgDT33LXA__yfmByNpLAqRB41eEjhIFAc"}], "formats": ["Lesson Plan Document"], "p": [2, 0, 0, 1, 1, 0], "ev": "Teacher-curated research bots and writing feedback tools support a culturally rich unit while the teacher focuses on discussion. Targeted feedback on student writing."}, {"id": 25, "title": "AI-Powered Figurative Language Scavenger Hunt with Feedback", "desc": ["To deepen understanding of figurative language, a sixth‑grade ELA teacher redesigned her lesson as a self‑paced scavenger hunt using SchoolAI’s Sidekick tool. Students worked in pairs to analyze popular song lyrics, submit their findings to Sidekick and receive immediate, tailored feedback. The AI adapted to each learner’s skill level and provided teachers with transcripts and session summaries to monitor progress and engagement.", "This technology‑enhanced activity transformed a typically disengaged time of year into an interactive experience that challenged advanced students while supporting those still developing mastery."], "ben": {"t": ["Real‑time insights, differentiated feedback and session summaries enable targeted reteaching and classroom management"], "s": ["Engages students through music, provides immediate feedback and adapts to diverse skill levels"]}, "grades": ["6th"], "subjects": ["ELA"], "role": "Student", "tools": [{"l": "SchoolAI", "u": "https://schoolai.com"}], "authors": [], "res": [{"l": "Lesson Plan Document", "u": "https://drive.google.com/open?id=1dVvp5x4QHUTjlgFNg0RIDVrWgtebhQDBBNv84cVs_Ds"}, {"l": "Resource 2", "u": "https://drive.google.com/open?id=1tYrBMtl5m98ZHxxXcj11XnMutZcGS0NOpU7iu_fJpS4"}, {"l": "Resource 3", "u": "https://drive.google.com/open?id=1DADFrfiata5ap7HYRPXa_oRMo8rrC0tdSzVUFeutTes"}], "formats": ["Lesson Plan Document"], "p": [2, 0, 0, 2, 2, 0], "ev": "Teacher uses transcripts and session summaries to monitor progress and target reteaching. AI adapts to each learner, challenging advanced students and supporting those still developing."}, {"id": 26, "title": "AI-Enhanced Sports Rules Refresher with Curipod", "desc": ["This multi‑grade physical education lesson uses MagicSchool AI and Curipod to help students quickly learn and apply the rules of sports like pickleball or volleyball. The teacher generates student‑friendly rule summaries and quick‑check questions with MagicSchool AI, then imports them into Curipod for live polls and word clouds. Students rotate through stations to read rules, practice skills, solve scenarios and compete in mini‑games using the rule sheets for reference.", "The blended approach saves prep time, models ethical AI use and transforms rule instruction into an active, interactive experience with multiple opportunities for review and application."], "ben": {"t": ["Saves prep time by generating rules and quizzes while keeping teacher control over content"], "s": ["Makes learning game rules interactive with live quizzes, feedback and physical practice"]}, "grades": ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"], "subjects": ["Physical Education"], "role": "Student", "tools": [{"l": "MagicSchool", "u": "https://www.magicschool.ai"}, {"l": "Curipod", "u": "https://www.curipod.com"}], "authors": [], "res": [{"l": "Lesson Plan Document", "u": "https://drive.google.com/open?id=1AjDMIKerzZ7xD4guQodFCh6qkelfnntU"}], "formats": ["Lesson Plan Document"], "p": [2, 0, 1, 2, 0, 0], "ev": "AI-generated rule summaries and quizzes save prep while the teacher keeps control over content. Lesson models ethical AI use."}, {"id": 27, "title": "AI-Driven Heroes in History Project: Got Grit", "desc": ["Fourth‑grade students research a historical figure who overcame significant challenges and then use generative AI to create a superhero persona representing that person. After conducting research, students design the character’s costume and backstory, crafting detailed prompts to generate images using Adobe Express or Canva AI.", "By blending research, creative writing and digital art, this project engages students in critical thinking about perseverance while teaching them to evaluate AI outputs for accuracy and bias."], "ben": {"t": ["Encourages exploration of AI image generation while fostering critical analysis of its strengths and limitations"], "s": ["Allows students to practice research and digital storytelling, learning how prompt wording influences AI‑generated images"]}, "grades": ["4th"], "subjects": ["Social Studies", "Library Media"], "role": "Student", "tools": [{"l": "Adobe Express", "u": "https://www.adobe.com/express"}, {"l": "Canva AI", "u": "https://www.canva.com"}], "authors": [], "res": [{"l": "Lesson Plan Document", "u": "https://drive.google.com/open?id=1wbdCzxO9w26xLsetx-xxTUaHXZNp02yv"}], "formats": ["Lesson Plan Document", "Image"], "p": [2, 0, 2, 2, 1, 0], "ev": "Students learn how prompt wording shapes AI images and explore strengths and limitations. Students evaluate AI outputs for accuracy and bias; bias checking supports fair representation."}, {"id": 28, "title": "AI-Powered Great Depression Choose-Your-Own-Adventure", "desc": ["High school students use the Gemini language model to explore the trials and tribulations faced by Americans during the Great Depression. After a brief demonstration on effective prompting, students interact with the AI to make choices and investigate different aspects of the era.", "The activity provides an individualized, engaging way to learn about historical events with minimal preparation time for the teacher."], "ben": {"t": ["Requires minimal preparation while offering an engaging exploration of the Great Depression"], "s": ["Allows students to direct their own learning and engage deeply with historical content"]}, "grades": ["9th", "10th", "11th", "12th"], "subjects": ["Social Studies"], "role": "Student", "tools": [{"l": "Gemini", "u": "https://gemini.google.com"}], "authors": [], "res": [{"l": "Lesson Plan Document", "u": "https://drive.google.com/open?id=1T-sWWeVSmETHOBWq96RKTjYu6Q9xFg4gXJFYlHB_FDM"}], "formats": ["Lesson Plan Document"], "p": [2, 0, 1, 0, 1, 0], "ev": "Brief demonstration on effective prompting before students interact with Gemini. Individualized, student-directed exploration."}, {"id": 29, "title": "AI-Supported Student Podcast Project", "desc": ["In this project‑based learning unit for upper elementary students, learners create 2‑4 minute podcasts in Canva for Education to demonstrate mastery in science, social studies or reading. Students research a topic aligned to curriculum standards, plan and script their episode, and produce a polished podcast with audio, music and visuals. AI tools such as SchoolAI, Magic School and Gemini are used ethically as coaches for brainstorming, outlining and bias checking, while teachers maintain control and review all outputs.", "Students complete an AI use log and bias checklist before publishing privately through the LMS, building research, communication and digital literacy skills while replacing traditional tests with multimodal performance assessment."], "ben": {"t": ["Provides templates and AI support to guide students through planning, scripting and producing podcasts"], "s": ["Offers a creative alternative to tests that develops research, speaking and digital citizenship skills"]}, "grades": ["4th", "5th"], "subjects": ["ELA", "Science", "Social Studies"], "role": "Student", "tools": [{"l": "SchoolAI", "u": "https://schoolai.com"}, {"l": "MagicSchool", "u": "https://www.magicschool.ai"}, {"l": "Gemini", "u": "https://gemini.google.com"}], "authors": [], "res": [{"l": "Lesson Plan Document", "u": "https://drive.google.com/open?id=14CmxL_0uNzPxeyWy_2zJsduIPwyivxLnyXPz3GPgIe4"}], "formats": ["Lesson Plan Document"], "p": [2, 2, 2, 2, 1, 2], "ev": "AI used ethically as a coach for brainstorming, outlining and bias checking; teachers review all outputs. Students keep an AI use log and complete a bias checklist. Podcasts publish privately through the LMS. Multimodal assessment gives students another way to show mastery."}, {"id": 30, "title": "AI-Supported Middle School Math Practice with SNORKL", "desc": ["A middle school math teacher uses SNORKL to provide students with immediate feedback and encouragement during practice. Students work through premade and custom activities while the built‑in coach guides them without giving away answers. The teacher monitors student progress, common errors and misconceptions through the platform and adjusts instruction accordingly.", "This approach promotes independence and confidence by allowing students to revise their work and hear suggestions, while saving teachers time and supporting intervention needs."], "ben": {"t": ["Saves time by delivering instant feedback, tracking progress and highlighting common errors"], "s": ["Encourages independence and persistence by providing on‑demand coaching and multiple revision opportunities"]}, "grades": ["7th", "8th"], "subjects": ["Math"], "role": "Student", "tools": [{"l": "Snorkl", "u": "https://snorkl.ai"}], "authors": [], "res": [{"l": "Image", "u": "https://drive.google.com/open?id=1OAbpn9tuAgktcfhjaQUj0mBhOfE3VH1F"}, {"l": "Resource 2", "u": "https://drive.google.com/open?id=1o7BPGPQyBaMDV7liDkWM8JQ7z4n5zemV"}, {"l": "Resource 3", "u": "https://drive.google.com/open?id=1yGC8lQx5aUfdok74DnEqP5seUQDQm7Mi"}, {"l": "Resource 4", "u": "https://drive.google.com/open?id=1i2OGfLoOjdTmzNoiR01JpJkCG32iF0B3"}, {"l": "Resource 5", "u": "https://drive.google.com/open?id=1-z8tPW5uEEYmF6mxYAy7IDeB2y30ELPD"}], "formats": ["Image"], "p": [2, 0, 0, 2, 2, 0], "ev": "Teacher monitors progress, common errors and misconceptions and adjusts instruction. AI coach guides without giving away answers. Supports intervention needs and independent revision."}, {"id": 31, "title": "AI-Generated Music to Energize Lessons Across Subjects", "desc": ["Using the Suno AI music generator, teachers can instantly transform dry content into catchy, professionally produced songs tailored to any subject. By providing a prompt or uploading lyrics, educators generate songs in various genres, edit the lyrics and download audio files. The custom tracks can reinforce concepts such as photosynthesis or long division, making lessons more memorable and engaging.", "The free tool allows up to ten songs per day, enabling teachers to experiment with different styles and involve students in choosing genre and mood."], "ben": {"t": ["Provides a unique, cross‑curricular way to enhance content and edit lyrics for classroom needs"], "s": ["Music helps learning stick and allows students to contribute to song style and genre"]}, "grades": ["Pre-K", "Kindergarten", "1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th", "11th", "12th"], "subjects": ["ELA", "Math", "Science", "Social Studies", "Music or Arts", "Physical Education"], "role": "Educator", "tools": [{"l": "Suno", "u": "https://suno.ai"}], "authors": [], "res": [{"l": "Image", "u": "https://drive.google.com/open?id=1sQ54RxKmGlHZj1z5qbyzv2jO6i7WqzxA"}], "formats": ["Image"], "p": [2, 0, 0, 1, 0, 0], "ev": "Songs reinforce specific concepts (e.g., photosynthesis, long division). Teachers edit AI lyrics for classroom needs."}, {"id": 32, "title": "AI-Powered Custom Storybooks for Early Readers", "desc": ["A primary teacher uses Gemini Storybook to create personalized digital storybooks that feature herself and her students across a range of subjects. The tool allows educators to generate custom books tailored to young learners’ interests and instructional needs, making complex concepts accessible in a familiar format. Other teachers in the school adapt the approach for PE and art.", "By producing differentiated, relevant content, the AI supports early literacy and provides engaging materials for virtual and in‑person classrooms."], "ben": {"t": ["Generates custom, differentiated content quickly and flexibly"], "s": ["Makes learning relevant with personalized stories that aid comprehension"]}, "grades": ["Pre-K", "Kindergarten", "1st", "2nd"], "subjects": ["ELA", "Math", "Science", "Social Studies", "Music or Arts", "Physical Education"], "role": "Educator", "tools": [{"l": "Gemini Storybook", "u": "https://gemini.google.com"}], "authors": [], "res": [{"l": "Video", "u": "https://drive.google.com/open?id=1WIkhk1SOWd73Hnw8FfhGQ_BBxH5ENyup"}], "formats": ["Video"], "p": [2, 0, 0, 0, 2, 0], "ev": "Personalized, differentiated storybooks make concepts accessible for early learners."}]</script>
+<script>
+(function(){
+const BASE = JSON.parse(document.getElementById('lessonData').textContent);
+const P = [
+  {k:'Purposeful Use', s:'Purposeful Use', d:'AI is used intentionally for a defined instructional or workflow need, with teacher decision-making kept central.'},
+  {k:'Privacy', s:'Privacy', d:'Student data is protected: personal identifiers excluded, private or school-managed platforms, or explicit safeguards described.'},
+  {k:'AI Literacy', s:'AI Literacy', d:'Students or teachers build understanding of how AI works, including prompting, capabilities and limitations.'},
+  {k:'Human Oversight & Critical Thinking', s:'Human Oversight', d:'Teachers review or verify AI output, and/or students critically evaluate AI output, before it is relied on.'},
+  {k:'Equity', s:'Equity', d:'AI is used to differentiate, scaffold, increase access, or identify gaps so every student gets needed support.'},
+  {k:'Transparency', s:'Transparency', d:'AI use is openly communicated or documented for students, families or audiences (e.g., norms, disclosures, AI use logs).'}
+];
+/* Shown when a visitor can't save through the page. Set to an address to show it. */
+const COORD = '';
+const pc = i => `var(--p${i+1})`;
+const GR = ['Pre-K','Kindergarten','1st','2nd','3rd','4th','5th','6th','7th','8th','9th','10th','11th','12th'];
+const GS = ['PK','K','1','2','3','4','5','6','7','8','9','10','11','12'];
+const BANDS = [{k:'PK–2',g:[0,1,2,3]},{k:'3–5',g:[4,5,6]},{k:'6–8',g:[7,8,9]},{k:'9–12',g:[10,11,12,13]}];
+const SUBJ = {'Music or Arts':'Music & Arts','Computer Science-AI':'Computer Science / AI','Stem - PLTW':'STEM (PLTW)'};
+const ROLE = {'Student':'Students use AI','Educator':'Teacher uses AI'};
+const RES_TYPES = ['Lesson Plan Document','Presentation','Video','Image','Student Work Sample','Written Reflection','Case Study','Other'];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const subj = s => SUBJ[s] || s;
+const safeUrl = u => { u = String(u||'').trim(); return /^https?:\/\/[^\s]+$/i.test(u) ? u : ''; };
+const $ = id => document.getElementById(id);
+const fmtDate = iso => { try { return new Date(iso).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}); } catch(e){ return ''; } };
+const rid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+
+/* known tool URLs, most-used first */
+const toolCount = {}, toolUrl = {};
+BASE.forEach(x => x.tools.forEach(t => { toolCount[t.l] = (toolCount[t.l]||0)+1; if(t.u) toolUrl[t.l] = t.u; }));
+const COMMON_TOOLS = Object.keys(toolCount).sort((a,b)=>toolCount[b]-toolCount[a] || a.localeCompare(b)).slice(0,14);
+const BASE_SUBJECTS = [...new Set(BASE.flatMap(x=>x.subjects))];
+
+let L = [];
+let approved = [];
+function gradeLabel(gi){
+  if(!gi.length) return 'All grades';
+  const contiguous = gi.every((v,i) => i === 0 || v === gi[i-1] + 1);
+  if(gi.length === 1) return gi[0] <= 1 ? GR[gi[0]] : 'Grade ' + GS[gi[0]];
+  if(contiguous) return 'Grades ' + GS[gi[0]] + '–' + GS[gi[gi.length-1]];
+  return 'Grades ' + gi.map(i => GS[i]).join(', ');
+}
+function prep(x){
+  x = Object.assign({}, x);
+  x.id = String(x.id);
+  x.gi = (x.grades||[]).map(g => GR.indexOf(g)).filter(i => i >= 0).sort((a,b)=>a-b);
+  x.gl = gradeLabel(x.gi);
+  x.p = (x.p||[0,0,0,0,0,0]).map(v => v === 2 ? 2 : v === 1 ? 1 : 0);
+  x.np = x.p.filter(v => v === 2).length + x.p.filter(v => v === 1).length * 0.5;
+  x.hay = [x.title, (x.desc||[]).join(' '), (x.tools||[]).map(t=>t.l).join(' '), (x.authors||[]).map(a=>a[0]).join(' '), (x.subjects||[]).join(' ')].join(' ').toLowerCase();
+  return x;
+}
+
+/* state */
+const st = {q:'', bands:new Set(), subj:new Set(), prac:new Set(), partial:false, tool:'', role:'', fmt:new Set(), sort:'title'};
+try { const saved = JSON.parse(localStorage.getItem('exlib-sort')||'null'); if(saved) st.sort = saved; } catch(e){}
+
+$('legendStrip').innerHTML = P.map((p,i)=>`<span><i style="background:${pc(i)}"></i>${i+1}. ${esc(p.s)}</span>`).join('');
+
+/* filters: markup rebuilt from state whenever the lesson set changes; listeners attached once */
+const count = fn => L.filter(fn).length;
+const fBand = $('fBand'), fSubject = $('fSubject'), fPractice = $('fPractice'), fTool = $('fTool'), fRole = $('fRole'), fFormat = $('fFormat');
+function buildFilters(){
+  fBand.innerHTML = BANDS.map((b,i)=>`<button type="button" class="chip" aria-pressed="${st.bands.has(i)}" data-i="${i}">${b.k} <span class="n">${count(x=>x.gi.some(g=>b.g.includes(g)))}</span></button>`).join('');
+  const subjects = [...new Set(L.flatMap(x=>x.subjects))].sort((a,b)=>count(x=>x.subjects.includes(b))-count(x=>x.subjects.includes(a)) || a.localeCompare(b));
+  fSubject.innerHTML = subjects.map((s,i)=>`<label><input type="checkbox" id="sub-${i}" value="${esc(s)}"${st.subj.has(s)?' checked':''}> ${esc(subj(s))}<span class="n">${count(x=>x.subjects.includes(s))}</span></label>`).join('');
+  fPractice.innerHTML = P.map((p,i)=>`<button type="button" class="pchip" aria-pressed="${st.prac.has(i)}" data-i="${i}" style="--c:${pc(i)}"><span class="num">${i+1}</span>${esc(p.s)}<span class="n" data-pn="${i}"></span></button>`).join('');
+  const tools = [...new Set(L.flatMap(x=>x.tools.map(t=>t.l)))].sort((a,b)=>a.localeCompare(b));
+  fTool.innerHTML = `<option value="">Any tool</option>` + tools.map(t=>`<option value="${esc(t)}">${esc(t)} (${count(x=>x.tools.some(y=>y.l===t))})</option>`).join('');
+  fTool.value = tools.includes(st.tool) ? st.tool : '';
+  fRole.innerHTML = Object.keys(ROLE).map(r=>`<button type="button" class="chip" aria-pressed="${st.role===r}" data-r="${r}">${ROLE[r]} <span class="n">${count(x=>x.role===r)}</span></button>`).join('');
+  const formats = [...new Set(L.flatMap(x=>x.formats))].sort((a,b)=>count(x=>x.formats.includes(b))-count(x=>x.formats.includes(a)));
+  fFormat.innerHTML = formats.map((s,i)=>`<label><input type="checkbox" id="fmt-${i}" value="${esc(s)}"${st.fmt.has(s)?' checked':''}> ${esc(s)}<span class="n">${count(x=>x.formats.includes(s))}</span></label>`).join('');
+}
+fBand.addEventListener('click', e => { const b = e.target.closest('.chip'); if(!b) return; toggleSet(st.bands, +b.dataset.i); b.setAttribute('aria-pressed', st.bands.has(+b.dataset.i)); render(); });
+fSubject.addEventListener('change', e => { toggleSet(st.subj, e.target.value); render(); });
+fPractice.addEventListener('click', e => { const b = e.target.closest('.pchip'); if(!b) return; toggleSet(st.prac, +b.dataset.i); b.setAttribute('aria-pressed', st.prac.has(+b.dataset.i)); render(); });
+$('fPartial').addEventListener('change', e => { st.partial = e.target.checked; render(); });
+fTool.addEventListener('change', e => { st.tool = e.target.value; render(); });
+fRole.addEventListener('click', e => { const b = e.target.closest('.chip'); if(!b) return; st.role = st.role === b.dataset.r ? '' : b.dataset.r; fRole.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed', c.dataset.r === st.role)); render(); });
+fFormat.addEventListener('change', e => { toggleSet(st.fmt, e.target.value); render(); });
+let qT; $('q').addEventListener('input', e => { clearTimeout(qT); qT = setTimeout(()=>{ st.q = e.target.value.trim().toLowerCase(); render(); }, 120); });
+const sortSel = $('sort'); sortSel.value = st.sort;
+sortSel.addEventListener('change', e => { st.sort = e.target.value; try{localStorage.setItem('exlib-sort', JSON.stringify(st.sort))}catch(err){} render(); });
+$('clearAll').addEventListener('click', clearAll);
+function clearAll(){
+  st.q=''; st.bands.clear(); st.subj.clear(); st.prac.clear(); st.partial=false; st.tool=''; st.role=''; st.fmt.clear();
+  $('q').value=''; fTool.value=''; $('fPartial').checked=false;
+  document.querySelectorAll('.rail [aria-pressed]').forEach(b=>b.setAttribute('aria-pressed','false'));
+  document.querySelectorAll('.rail input[type=checkbox]').forEach(c=>c.checked=false);
+  render();
+}
+function toggleSet(s,v){ s.has(v) ? s.delete(v) : s.add(v); }
+
+const meets = (x,i) => st.partial ? x.p[i] >= 1 : x.p[i] === 2;
+function filtered(){
+  return L.filter(x =>
+    (!st.q || st.q.split(/\s+/).every(w => x.hay.includes(w))) &&
+    (!st.bands.size || [...st.bands].some(b => x.gi.some(g => BANDS[b].g.includes(g)))) &&
+    (!st.subj.size || x.subjects.some(s => st.subj.has(s))) &&
+    (!st.prac.size || [...st.prac].every(i => meets(x,i))) &&
+    (!st.tool || x.tools.some(t => t.l === st.tool)) &&
+    (!st.role || x.role === st.role) &&
+    (!st.fmt.size || x.formats.some(f => st.fmt.has(f)))
+  );
+}
+function sorted(arr){
+  const a = arr.slice();
+  if(st.sort==='title') a.sort((x,y)=>x.title.localeCompare(y.title));
+  if(st.sort==='grade') a.sort((x,y)=>(x.gi[0]??0)-(y.gi[0]??0) || x.title.localeCompare(y.title));
+  if(st.sort==='gradeDesc') a.sort((x,y)=>(y.gi[y.gi.length-1]??0)-(x.gi[x.gi.length-1]??0) || x.title.localeCompare(y.title));
+  if(st.sort==='practices') a.sort((x,y)=>y.np-x.np || x.title.localeCompare(y.title));
+  return a;
+}
+function tagsHTML(x){
+  return x.p.map((v,i)=> v ? `<span class="tag${v===1?' partial':''}" style="--c:${pc(i)}" title="${esc(P[i].k)}: ${v===2?'clearly evident':'partially evident'}">${esc(P[i].s)}</span>` : '').join('');
+}
+function render(){
+  const list = sorted(filtered());
+  const n = list.length;
+  $('count').innerHTML = `${n} ${n===1?'lesson':'lessons'} <span>of ${L.length}</span>`;
+  const active = st.bands.size + st.subj.size + st.prac.size + st.fmt.size + (st.q?1:0) + (st.tool?1:0) + (st.role?1:0);
+  $('activeCount').textContent = active ? `${active} active` : '';
+  P.forEach((p,i)=>{ const el = fPractice.querySelector(`[data-pn="${i}"]`); if(el) el.textContent = count(x=>meets(x,i)); });
+  const g = $('grid');
+  if(!n){ g.innerHTML = `<div class="empty" style="grid-column:1/-1"><p style="margin:0 0 8px">No lessons match all of these filters.</p><button class="clear" type="button" id="emptyClear">Clear all filters</button></div>`; $('emptyClear').onclick = clearAll; return; }
+  g.innerHTML = list.map(x => `
+    <button type="button" class="card" data-id="${esc(x.id)}" aria-label="Open lesson: ${esc(x.title)}">
+      <div class="meta"><span class="gr">${esc(x.gl)}</span><span>${x.subjects.map(s=>esc(subj(s))).join(' · ')}</span>${x.isNew?'<span class="newpill">New</span>':''}</div>
+      <h2>${esc(x.title)}</h2>
+      <p>${esc((x.desc||[])[0]||'')}</p>
+      <div class="tools"><b>Tools:</b> ${x.tools.length ? x.tools.slice(0,4).map(t=>esc(t.l)).join(', ') : 'Not listed'}${x.tools.length>4?` +${x.tools.length-4}`:''}</div>
+      <div class="tags" aria-label="MDE practices">${tagsHTML(x)}</div>
+    </button>`).join('');
+}
+$('grid').addEventListener('click', e => { const c = e.target.closest('.card'); if(c) location.hash = 'lesson-' + c.dataset.id; });
+
+/* lesson drawer */
+const drawer = $('drawer'), scrim = $('scrim');
+let lastView = 'browse', lastFocus = null;
+function toolLinks(tools){
+  return tools.map(t => { const u = safeUrl(t.u); return u ? `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(t.l)} ↗</a>` : `<span class="tool-chip">${esc(t.l)}</span>`; }).join('');
+}
+function openLesson(id){
+  const x = L.find(l => l.id === id); if(!x) return false;
+  const lvl = ['Not evident','Partially evident','Clearly evident'];
+  const res = x.res.filter(r => safeUrl(r.u));
+  drawer.innerHTML = `
+    <button class="close" type="button" id="dClose">Close</button>
+    <div class="meta" style="padding-top:6px"><span class="gr">${esc(x.gl)}</span><span>${x.subjects.map(s=>esc(subj(s))).join(' · ')}</span><span>· ${esc(ROLE[x.role]||x.role)}</span></div>
+    <h2 id="dTitle">${esc(x.title)}</h2>
+    <div class="tags" style="border:0;padding:0">${tagsHTML(x)}</div>
+    ${res.length ? `<div class="dsec"><h3>Lesson resources</h3><div class="links">${res.map((r,i)=>`<a href="${esc(safeUrl(r.u))}" target="_blank" rel="noopener"${i===0?' class="primary"':''}>${esc(r.l)} ↗</a>`).join('')}</div></div>` : ''}
+    <div class="dsec"><h3>About this lesson</h3>${x.desc.map(p=>`<p>${esc(p)}</p>`).join('')}</div>
+    <dl class="facts">
+      <div><dt>Grades</dt><dd>${esc(x.grades.join(', '))}</dd></div>
+      <div><dt>Subject</dt><dd>${x.subjects.map(s=>esc(subj(s))).join(', ')}</dd></div>
+      <div><dt>Who uses the AI</dt><dd>${esc(ROLE[x.role]||x.role)}</dd></div>
+      <div><dt>Shared as</dt><dd>${esc(x.formats.join(', ') || '—')}</dd></div>
+    </dl>
+    ${(x.ben.t.length||x.ben.s.length) ? `<div class="dsec"><h3>Benefits</h3><div class="ben">
+      ${x.ben.t.length?`<div><h4>For teachers</h4><ul>${x.ben.t.map(b=>`<li>${esc(b)}</li>`).join('')}</ul></div>`:''}
+      ${x.ben.s.length?`<div><h4>For students</h4><ul>${x.ben.s.map(b=>`<li>${esc(b)}</li>`).join('')}</ul></div>`:''}
+    </div></div>` : ''}
+    ${x.tools.length ? `<div class="dsec"><h3>AI tools</h3><div class="links">${toolLinks(x.tools)}</div></div>` : ''}
+    <div class="dsec"><h3>MDE Essential AI Practices</h3>
+      <div class="align">${P.map((p,i)=>`<div class="arow s${x.p[i]}" style="--c:${pc(i)}"><span class="dot" aria-hidden="true"></span><strong>${i+1}. ${esc(p.k)}</strong><span class="lvl">${lvl[x.p[i]]}</span></div>`).join('')}</div>
+      ${x.ev?`<p class="evidence">${esc(x.ev)}</p>`:''}
+    </div>
+    <div class="dsec"><h3>Shared by</h3><div class="credits">${x.authors.length ? x.authors.map(a=>`<div>${esc(a[0])}${a[1]?` <span>· ${esc(a[1])}</span>`:''}</div>`).join('') : '<div><span>Contributor not listed</span></div>'}</div></div>`;
+  drawer.hidden = false; scrim.hidden = false; document.body.style.overflow = 'hidden';
+  drawer.scrollTop = 0;
+  $('dClose').onclick = closeLesson;
+  $('dClose').focus({preventScroll:true});
+  return true;
+}
+function closeLesson(){ location.hash = lastView; }
+function hideDrawer(){
+  if(drawer.hidden) return;
+  drawer.hidden = true; scrim.hidden = true; document.body.style.overflow = '';
+  if(lastFocus && document.contains(lastFocus)) lastFocus.focus({preventScroll:true});
+}
+scrim.addEventListener('click', closeLesson);
+document.addEventListener('keydown', e => { if(e.key === 'Escape' && !drawer.hidden) closeLesson(); });
+document.addEventListener('click', e => { const c = e.target.closest('.card,[data-open]'); if(c) lastFocus = c; }, true);
+
+/* practices view */
+function buildPractices(){
+  const n = L.length;
+  $('pgrid').innerHTML = P.map((p,i)=>{
+    const c2 = L.filter(x=>x.p[i]===2).length, c1 = L.filter(x=>x.p[i]===1).length;
+    return `<article class="pcard" style="--c:${pc(i)}">
+      <h3><span class="num">0${i+1}</span>${esc(p.k)}</h3>
+      <p>${esc(p.d)}</p>
+      <div class="bar" role="img" aria-label="${c2} clearly evident, ${c1} partially evident of ${n}"><i style="width:${c2/n*100}%;background:${pc(i)}"></i><i style="width:${c1/n*100}%;background:color-mix(in srgb, ${pc(i)} 35%, transparent)"></i></div>
+      <div class="barlab"><span>${c2} clear · ${c1} partial</span><span>${n-c2-c1} not evident</span></div>
+      <button class="go" type="button" data-prac="${i}">See lessons that model this</button>
+    </article>`;}).join('');
+  const rows = L.slice().sort((a,b)=>a.title.localeCompare(b.title));
+  const tot = P.map((p,i)=>[L.filter(x=>x.p[i]===2).length, L.filter(x=>x.p[i]===1).length]);
+  $('matrix').innerHTML = `
+    <thead><tr><th scope="col">Lesson</th><th scope="col">Grades</th>${P.map((p,i)=>`<th scope="col" title="${esc(p.k)}" style="color:${pc(i)}">${i+1}. ${esc(p.s)}</th>`).join('')}</tr></thead>
+    <tbody>${rows.map(x=>`<tr><td><button type="button" data-open="${esc(x.id)}">${esc(x.title)}</button></td><td class="gr">${esc(x.gl.replace('Grades ','').replace('Grade ',''))}</td>${x.p.map((v,i)=>`<td>${v?`<i class="mk s${v}" style="--c:${pc(i)}" title="${v===2?'Clearly':'Partially'} evident"></i>`:''}</td>`).join('')}</tr>`).join('')}</tbody>
+    <tfoot><tr><td>Clearly / partially evident</td><td></td>${tot.map(t=>`<td>${t[0]} / ${t[1]}</td>`).join('')}</tr></tfoot>`;
+}
+$('pgrid').addEventListener('click', e => {
+  const b = e.target.closest('[data-prac]'); if(!b) return;
+  clearAll(); const i = +b.dataset.prac; st.prac.add(i); st.partial = true; $('fPartial').checked = true;
+  fPractice.querySelector(`[data-i="${i}"]`).setAttribute('aria-pressed','true'); render(); location.hash = 'browse';
+});
+$('matrix').addEventListener('click', e => { const b = e.target.closest('[data-open]'); if(b) location.hash = 'lesson-' + b.dataset.open; });
+
+/* roadmap */
+function buildRoadmap(){
+  const R = [
+    {live:true, s:'In the library', t:'Classroom lessons', d:`${L.length} teacher-built exemplars across ${new Set(L.flatMap(x=>x.subjects)).size} subject areas, Pre-K through 12th grade.`, b:['Browse by grade band, subject, tool and practice','MDE practice tags on every lesson']},
+    {s:'Planned', t:'Administrative & leadership use cases', d:'Examples of how principals, coaches and district leaders use AI for communication, data review, scheduling and planning.', b:['Same practice tags, with Privacy and Transparency front and center','Filter by role: building leader, district leader, coach']},
+    {s:'Planned', t:'PA 146 literacy & dyslexia support', d:'Exemplars that support Michigan’s PA 146 literacy and dyslexia requirements, from screening follow-up to structured literacy practice.', b:['Reading fluency, decoding and text-leveling examples','Clear notes on student data and voice-recording privacy']},
+    {s:'Planned', t:'Workflow & productivity templates', d:'Reusable prompts and templates for everyday educator tasks such as parent communication, rubric drafting and meeting notes.', b:['Copy-ready prompt templates','Tagged with the practice each template supports']}
+  ];
+  $('road').innerHTML = R.map(r=>`<article class="rcard${r.live?' live':''}"><span class="status">${r.s}</span><h3>${esc(r.t)}</h3><p>${esc(r.d)}</p><ul>${r.b.map(b=>`<li>${esc(b)}</li>`).join('')}</ul></article>`).join('');
+}
+
+function setData(){
+  L = BASE.concat(approved).map(prep);
+  $('statN').textContent = L.length + ' exemplars';
+  buildFilters(); buildPractices(); buildRoadmap(); render();
+  if(/^#lesson-/.test(location.hash) && drawer.hidden) route();
+}
+
+/* ---------- submit form ---------- */
+const form = $('subForm');
+$('s-grades').innerHTML = GR.map((g,i)=>`<label><input type="checkbox" id="sg-${i}" value="${esc(g)}"> ${esc(g)}</label>`).join('');
+$('s-subjects').innerHTML = BASE_SUBJECTS.map((s,i)=>`<label><input type="checkbox" id="ss-${i}" value="${esc(s)}"> ${esc(subj(s))}</label>`).join('');
+$('s-tools').innerHTML = COMMON_TOOLS.map((t,i)=>`<label><input type="checkbox" id="st-${i}" value="${esc(t)}"> ${esc(t)}</label>`).join('');
+$('s-prac').innerHTML = P.map((p,i)=>`<div class="prow" style="--c:${pc(i)}">
+  <div><strong><span class="num">${i+1}</span>${esc(p.k)}</strong><p>${esc(p.d)}</p></div>
+  <div class="seg" role="radiogroup" aria-label="${esc(p.k)}">
+    <label class="v0"><input type="radio" name="fp${i}" id="fp${i}-0" value="0" checked>Not shown</label>
+    <label class="v1"><input type="radio" name="fp${i}" id="fp${i}-1" value="1">Partly</label>
+    <label class="v2"><input type="radio" name="fp${i}" id="fp${i}-2" value="2">Clearly</label>
+  </div></div>`).join('');
+let resN = 0;
+function addResRow(label, url){
+  const n = resN++;
+  const row = document.createElement('div');
+  row.className = 'resrow';
+  row.innerHTML = `<select id="sr-l-${n}" aria-label="Material type">${RES_TYPES.map(t=>`<option${t===(label||'Lesson Plan Document')?' selected':''}>${esc(t)}</option>`).join('')}</select>
+    <input type="url" id="sr-u-${n}" placeholder="https://drive.google.com/…" aria-label="Link" value="${esc(url||'')}">
+    <button type="button" class="iconbtn" aria-label="Remove this link">Remove</button>`;
+  row.querySelector('button').onclick = () => { if($('s-res').children.length > 1){ row.remove(); saveDraft(); } else { row.querySelector('input').value=''; saveDraft(); } };
+  $('s-res').appendChild(row);
+}
+$('addRes').onclick = () => { addResRow(); $('s-res').lastElementChild.querySelector('input').focus(); };
+
+function collect(){
+  const checked = id => [...$(id).querySelectorAll('input:checked')].map(i=>i.value);
+  const lines = s => s.split(/\n+/).map(l=>l.replace(/^\s*[-•*]\s*/,'').trim()).filter(Boolean);
+  const subjects = checked('s-subjects'); const so = $('s-subj-other').value.trim(); if(so) subjects.push(so);
+  const tools = checked('s-tools').map(l=>({l, u: toolUrl[l]||''}));
+  $('s-tools-other').value.split(',').map(s=>s.trim()).filter(Boolean).forEach(l=>{ if(!tools.some(t=>t.l.toLowerCase()===l.toLowerCase())) tools.push({l, u: toolUrl[l]||''}); });
+  const res = [...$('s-res').children].map(r=>({l:r.querySelector('select').value, u:r.querySelector('input').value.trim()})).filter(r=>r.u);
+  const roleEl = form.querySelector('input[name="s-role"]:checked');
+  return {
+    title: $('s-title').value.trim(),
+    descRaw: $('s-desc').value.trim(),
+    benT: lines($('s-bent').value), benS: lines($('s-bens').value),
+    grades: checked('s-grades'), subjects, subjOther: so,
+    role: roleEl ? roleEl.value : '',
+    tools, toolsOther: $('s-tools-other').value,
+    res, formats: [...new Set(res.map(r=>r.l))],
+    p: P.map((_,i)=> +(form.querySelector(`input[name="fp${i}"]:checked`)||{value:0}).value),
+    ev: $('s-ev').value.trim(),
+    name: $('s-name').value.trim(), authorRole: $('s-arole').value, school: $('s-school').value.trim(), email: $('s-email').value.trim(),
+    consent: $('s-consent').checked
+  };
+}
+function validate(r){
+  const errs = {};
+  if(!r.title) errs.title = 'Add a title.';
+  if(r.descRaw.length < 40) errs.desc = 'Describe the lesson in at least a couple of sentences.';
+  if(!r.grades.length) errs.grades = 'Choose at least one grade.';
+  if(!r.subjects.length) errs.subjects = 'Choose a subject or type one in.';
+  if(!r.role) errs.role = 'Choose who uses the AI.';
+  if(!r.res.length) errs.res = 'Add at least one link to the lesson materials.';
+  else if(r.res.some(x=>!safeUrl(x.u))) errs.res = 'Links must start with https:// — check each one.';
+  if(!r.name) errs.name = 'Add your name so the lesson can be credited.';
+  if(!r.consent) errs.consent = 'Confirm you can share these materials.';
+  form.querySelectorAll('.field[data-f]').forEach(f => {
+    f.classList.toggle('invalid', !!errs[f.dataset.f]);
+    f.querySelector('.err')?.remove();
+    if(errs[f.dataset.f]) f.insertAdjacentHTML('beforeend', `<p class="err">${esc(errs[f.dataset.f])}</p>`);
+  });
+  const first = form.querySelector('.field.invalid');
+  if(first){ first.scrollIntoView({block:'center', behavior:'smooth'}); (first.querySelector('input,textarea')||first).focus({preventScroll:true}); }
+  return !first;
+}
+function asText(r){
+  return [
+    'AI EXEMPLAR LIBRARY — LESSON SUBMISSION',
+    '', 'Title: ' + r.title,
+    'Grades: ' + r.grades.join(', '),
+    'Subjects: ' + r.subjects.join(', '),
+    'Who uses the AI: ' + (ROLE[r.role]||r.role),
+    'AI tools: ' + (r.tools.map(t=>t.l).join(', ') || '—'),
+    '', 'Description:', r.descRaw,
+    '', 'Teacher benefits:', ...(r.benT.length ? r.benT.map(b=>'- '+b) : ['—']),
+    '', 'Student benefits:', ...(r.benS.length ? r.benS.map(b=>'- '+b) : ['—']),
+    '', 'Materials:', ...r.res.map(x=>`- ${x.l}: ${x.u}`),
+    '', 'MDE Essential AI Practices (self-assessed):', ...P.map((p,i)=>`- ${p.k}: ${['Not shown','Partly','Clearly'][r.p[i]]}`),
+    r.ev ? '\nHow the lesson shows them:\n' + r.ev : '',
+    '', `Submitted by: ${r.name} · ${r.authorRole}${r.school?' · '+r.school:''}${r.email?' · '+r.email:''}`,
+    'Permission to share confirmed: yes'
+  ].join('\n');
+}
+function toLesson(it, p){
+  return {
+    title: it.title,
+    desc: String(it.descRaw||'').split(/\n\s*\n/).map(s=>s.replace(/\s*\n\s*/g,' ').trim()).filter(Boolean),
+    ben: {t: it.benT||[], s: it.benS||[]},
+    grades: (it.grades||[]).filter(g=>GR.includes(g)),
+    subjects: it.subjects||[], role: it.role||'Student',
+    tools: (it.tools||[]).map(t=>({l:String(t.l), u:safeUrl(t.u)})),
+    res: (it.res||[]).filter(r=>safeUrl(r.u)).map(r=>({l:String(r.l), u:safeUrl(r.u)})),
+    formats: it.formats||[],
+    authors: [[it.name + (it.school ? ', ' + it.school : ''), it.authorRole||'']],
+    p: p || it.p || [0,0,0,0,0,0],
+    ev: it.ev||''
+  };
+}
+
+/* per-viewer draft */
+let draftT;
+function saveDraft(){ clearTimeout(draftT); draftT = setTimeout(()=>{ try{ localStorage.setItem('exlib-draft', JSON.stringify(collect())); }catch(e){} }, 400); }
+function restoreDraft(){
+  let d = null; try{ d = JSON.parse(localStorage.getItem('exlib-draft')||'null'); }catch(e){}
+  if(!d){ addResRow(); return; }
+  $('s-title').value = d.title||''; $('s-desc').value = d.descRaw||'';
+  $('s-bent').value = (d.benT||[]).join('\n'); $('s-bens').value = (d.benS||[]).join('\n');
+  const tick = (id, vals) => $(id).querySelectorAll('input').forEach(i => i.checked = (vals||[]).includes(i.value));
+  tick('s-grades', d.grades); tick('s-subjects', d.subjects); tick('s-tools', (d.tools||[]).map(t=>t.l));
+  $('s-subj-other').value = d.subjOther||''; $('s-tools-other').value = d.toolsOther||'';
+  form.querySelectorAll('input[name="s-role"]').forEach(i => i.checked = i.value === d.role);
+  (d.p||[]).forEach((v,i)=>{ const el = $(`fp${i}-${v}`); if(el) el.checked = true; });
+  $('s-ev').value = d.ev||''; $('s-name').value = d.name||''; if(d.authorRole) $('s-arole').value = d.authorRole;
+  $('s-school').value = d.school||''; $('s-email').value = d.email||'';
+  (d.res && d.res.length ? d.res : [{}]).forEach(r => addResRow(r.l, r.u));
+}
+function resetForm(keepAuthor){
+  const keep = keepAuthor ? {name:$('s-name').value, role:$('s-arole').value, school:$('s-school').value, email:$('s-email').value} : null;
+  form.reset(); $('s-res').innerHTML = ''; addResRow();
+  form.querySelectorAll('.field.invalid').forEach(f=>{ f.classList.remove('invalid'); f.querySelector('.err')?.remove(); });
+  if(keep){ $('s-name').value = keep.name; $('s-arole').value = keep.role; $('s-school').value = keep.school; $('s-email').value = keep.email; }
+  try{ localStorage.removeItem('exlib-draft'); }catch(e){}
+}
+form.addEventListener('input', saveDraft);
+form.addEventListener('change', saveDraft);
+let resetArmed = false;
+$('resetBtn').addEventListener('click', () => {
+  if(!resetArmed){ resetArmed = true; $('resetBtn').textContent = 'Click again to clear everything'; setTimeout(()=>{ resetArmed=false; $('resetBtn').textContent='Clear form'; }, 3000); return; }
+  resetArmed = false; $('resetBtn').textContent = 'Clear form'; resetForm(false); $('formMsg').innerHTML = '';
+});
+
+/* ---------- shared data (db) ---------- */
+let db = null, uid = null, canWrite = false, isEditor = false;
+let mySubs = [], reviews = {}, allSubs = [];
+function setMode(){
+  $('subBtn').textContent = canWrite ? 'Submit lesson' : 'Prepare my submission';
+  $('modeBanner').innerHTML = canWrite ? '' : `<div class="banner warn"><p><b>Submissions can't be saved from this view.</b> You may need Contributor access to this page, or to be signed in to Claude. You can still fill in the form: it will prepare your lesson as text to copy and email to ${COORD ? `<b style="user-select:all">${esc(COORD)}</b>` : 'your AI Ambassador coordinator'}.</p></div>`;
+  $('tabReview').hidden = !isEditor;
+}
+function showCopy(r){
+  $('formMsg').innerHTML = `<div class="banner warn"><p>Your submission is ready. Copy it and email it to ${COORD ? `<b style="user-select:all">${esc(COORD)}</b>` : 'your AI Ambassador coordinator'}.</p>
+    <textarea id="copyOut" readonly aria-label="Submission text">${esc(asText(r))}</textarea>
+    <div class="actions"><button type="button" class="btn" id="copyBtn">Copy submission</button><span id="copyMsg" class="hint" aria-live="polite"></span></div></div>`;
+  $('copyBtn').onclick = () => {
+    const ta = $('copyOut');
+    const fallback = () => { ta.focus(); ta.select(); $('copyMsg').textContent = 'Text selected. Press Ctrl+C (or ⌘C) to copy.'; };
+    try { navigator.clipboard.writeText(ta.value).then(()=>{ $('copyMsg').textContent = 'Copied.'; }, fallback); } catch(e){ fallback(); }
+  };
+  $('formMsg').scrollIntoView({block:'nearest', behavior:'smooth'});
+}
+form.addEventListener('submit', async e => {
+  e.preventDefault();
+  const r = collect();
+  if(!validate(r)) return;
+  if(!canWrite){ showCopy(r); return; }
+  const btn = $('subBtn'); btn.disabled = true; btn.textContent = 'Submitting…';
+  const item = Object.assign({}, r, {sid: rid(), submittedAt: new Date().toISOString()});
+  delete item.consent; item.consent = true;
+  const write = () => db.doc('submissions/' + uid).set({items: mySubs.concat([item]), updatedAt: item.submittedAt});
+  try {
+    try { await write(); } catch(err){ if(err && err.code === 'unavailable'){ await new Promise(r=>setTimeout(r, 800 + Math.random()*800)); await write(); } else throw err; }
+    resetForm(true);
+    $('formMsg').innerHTML = `<div class="banner ok"><p><b>Thanks, ${esc(r.name.split(' ')[0])}. Your lesson was submitted.</b> A reviewer will check the practice tags and add it to the library. You can follow its status under Your submissions.</p></div>`;
+    $('formMsg').scrollIntoView({block:'nearest', behavior:'smooth'});
+  } catch(err){
+    const code = err && err.code;
+    if(code === 'invalid_argument' || code === 'not_granted' || code === 'revoked'){ canWrite = false; setMode(); showCopy(r); }
+    else if(code === 'quota_exceeded'){ $('formMsg').innerHTML = `<div class="banner bad"><p>The library's submission storage is full, so this one couldn't be saved. Your form is still filled in. Let your coordinator know, then try again later.</p></div>`; }
+    else { $('formMsg').innerHTML = `<div class="banner bad"><p>The submission didn't go through because the connection dropped. Your form is still filled in, so try Submit again in a moment.</p></div>`; }
+  } finally { btn.disabled = false; setMode(); }
+});
+
+function statusOf(sid){ return (reviews[sid] && reviews[sid].status) || 'submitted'; }
+const STATUS = {submitted:'Waiting for review', approved:'In the library', declined:'Declined'};
+function renderMine(){
+  const box = $('mineBox');
+  if(!uid || !mySubs.length){ box.hidden = true; return; }
+  box.hidden = false;
+  $('mine').innerHTML = mySubs.slice().reverse().map(it => { const s = statusOf(it.sid), note = reviews[it.sid] && reviews[it.sid].note; return `
+    <div class="it"><b>${esc(it.title)}</b>
+      <div class="row"><span class="pill ${s}">${STATUS[s]}</span><span>${esc(fmtDate(it.submittedAt))}</span>
+      ${s==='approved' ? `<button type="button" class="linkbtn" data-view-lesson="${esc(it.sid)}">View</button>` : ''}
+      ${s==='submitted' ? `<button type="button" class="linkbtn" data-withdraw="${esc(it.sid)}">Withdraw</button>` : ''}</div>
+      ${note ? `<div class="hint">Reviewer note: ${esc(note)}</div>` : ''}
+    </div>`; }).join('');
+}
+$('mine').addEventListener('click', async e => {
+  const v = e.target.closest('[data-view-lesson]'); if(v){ location.hash = 'lesson-s-' + v.dataset.viewLesson; return; }
+  const w = e.target.closest('[data-withdraw]'); if(!w) return;
+  if(w.dataset.armed !== '1'){ w.dataset.armed = '1'; w.textContent = 'Confirm withdraw'; setTimeout(()=>{ if(document.contains(w)){ w.dataset.armed=''; w.textContent='Withdraw'; } }, 3000); return; }
+  w.disabled = true;
+  try { await db.doc('submissions/' + uid).set({items: mySubs.filter(x=>x.sid !== w.dataset.withdraw), updatedAt: new Date().toISOString()}); }
+  catch(err){ w.disabled = false; w.textContent = 'Withdraw failed, try again'; }
+});
+
+/* review queue (editors) */
+let rvFilter = 'submitted';
+const rvOpen = new Set(), rvP = {}, rvNote = {};
+function renderReview(){
+  if(!isEditor){ $('rvList').innerHTML = `<div class="empty">Only library editors can review submissions.</div>`; $('rvBar').innerHTML=''; return; }
+  const counts = {submitted:0, approved:0, declined:0};
+  allSubs.forEach(s => counts[statusOf(s.sid)]++);
+  $('rvBar').innerHTML = ['submitted','approved','declined','all'].map(k=>`<button type="button" class="chip" aria-pressed="${rvFilter===k}" data-f="${k}">${k==='all'?'All':STATUS[k]} <span class="n">${k==='all'?allSubs.length:counts[k]}</span></button>`).join('');
+  const list = allSubs.filter(s => rvFilter==='all' || statusOf(s.sid)===rvFilter).sort((a,b)=>String(b.submittedAt).localeCompare(String(a.submittedAt)));
+  if(!list.length){ $('rvList').innerHTML = `<div class="empty">${allSubs.length ? 'Nothing in this list.' : 'No submissions yet. New lessons from the Submit a lesson tab will appear here.'}</div>`; return; }
+  $('rvList').innerHTML = list.map(it => {
+    const s = statusOf(it.sid), rv = reviews[it.sid] || {};
+    const p = rvP[it.sid] || rv.p || it.p || [0,0,0,0,0,0];
+    const lz = toLesson(it, p);
+    return `<details class="rv" data-sid="${esc(it.sid)}"${rvOpen.has(it.sid)?' open':''}>
+      <summary><h3>${esc(it.title)}</h3><span class="pill ${s}">${STATUS[s]}</span>
+        <span class="by">${esc(it.name)}${it.school?' · '+esc(it.school):''} · ${esc(fmtDate(it.submittedAt))}</span></summary>
+      <div class="rvbody">
+        ${lz.desc.map(d=>`<p>${esc(d)}</p>`).join('')}
+        <dl class="facts">
+          <div><dt>Grades</dt><dd>${esc(lz.grades.join(', '))}</dd></div>
+          <div><dt>Subject</dt><dd>${esc(lz.subjects.join(', '))}</dd></div>
+          <div><dt>Who uses the AI</dt><dd>${esc(ROLE[lz.role]||lz.role)}</dd></div>
+          <div><dt>Submitter</dt><dd>${esc(it.name)} · ${esc(it.authorRole||'')}${it.email?`<br><span style="user-select:all">${esc(it.email)}</span>`:''}</dd></div>
+        </dl>
+        ${(lz.ben.t.length||lz.ben.s.length)?`<div class="ben">${lz.ben.t.length?`<div><h4>For teachers</h4><ul>${lz.ben.t.map(b=>`<li>${esc(b)}</li>`).join('')}</ul></div>`:''}${lz.ben.s.length?`<div><h4>For students</h4><ul>${lz.ben.s.map(b=>`<li>${esc(b)}</li>`).join('')}</ul></div>`:''}</div>`:''}
+        <div class="links">${lz.res.map(r=>`<a href="${esc(r.u)}" target="_blank" rel="noopener">${esc(r.l)} ↗</a>`).join('')}${toolLinks(lz.tools)}</div>
+        ${it.ev?`<p class="evidence">${esc(it.ev)}</p>`:''}
+        <div><div class="lab" style="margin-bottom:4px">MDE practice ratings <span class="hint">(submitter's self-assessment shown first)</span></div>
+        ${P.map((pp,i)=>`<div class="prow" style="--c:${pc(i)}"><strong><span class="num">${i+1}</span>${esc(pp.k)}</strong>
+          <div class="seg" role="radiogroup" aria-label="${esc(pp.k)}">${[0,1,2].map(v=>`<label class="v${v}"><input type="radio" name="rv-${esc(it.sid)}-${i}" id="rv-${esc(it.sid)}-${i}-${v}" value="${v}" data-pi="${i}"${p[i]===v?' checked':''}>${['Not shown','Partly','Clearly'][v]}</label>`).join('')}</div></div>`).join('')}</div>
+        <div class="field"><label class="lab" for="rvn-${esc(it.sid)}">Note to submitter (optional)</label><input type="text" id="rvn-${esc(it.sid)}" data-note maxlength="300" value="${esc(rvNote[it.sid] ?? rv.note ?? '')}"></div>
+        <div class="actions">
+          ${s!=='approved' ? `<button type="button" class="btn" data-act="approve">Add to library</button>` : `<button type="button" class="btn" data-act="approve">Update in library</button><button type="button" class="btn ghost" data-act="unpublish">Remove from library</button>`}
+          ${s!=='declined' ? `<button type="button" class="btn danger" data-act="decline">Decline</button>` : `<button type="button" class="btn ghost" data-act="reopen">Move back to waiting</button>`}
+          <span class="hint" data-msg aria-live="polite"></span>
+        </div>
+      </div></details>`;
+  }).join('');
+}
+$('rvBar').addEventListener('click', e => { const b = e.target.closest('[data-f]'); if(!b) return; rvFilter = b.dataset.f; renderReview(); });
+$('rvList').addEventListener('toggle', e => { const d = e.target; if(!d.dataset || !d.dataset.sid) return; d.open ? rvOpen.add(d.dataset.sid) : rvOpen.delete(d.dataset.sid); }, true);
+$('rvList').addEventListener('change', e => {
+  const d = e.target.closest('[data-sid]'); if(!d) return; const sid = d.dataset.sid;
+  if(e.target.dataset.pi !== undefined){ const p = (rvP[sid] || (reviews[sid]&&reviews[sid].p) || (allSubs.find(s=>s.sid===sid)||{}).p || [0,0,0,0,0,0]).slice(); p[+e.target.dataset.pi] = +e.target.value; rvP[sid] = p; }
+});
+$('rvList').addEventListener('input', e => { if(e.target.dataset.note === undefined) return; const d = e.target.closest('[data-sid]'); rvNote[d.dataset.sid] = e.target.value; });
+$('rvList').addEventListener('click', async e => {
+  const b = e.target.closest('[data-act]'); if(!b) return;
+  const d = b.closest('[data-sid]'), sid = d.dataset.sid, it = allSubs.find(s=>s.sid===sid); if(!it) return;
+  const msg = d.querySelector('[data-msg]');
+  const p = rvP[sid] || (reviews[sid]&&reviews[sid].p) || it.p || [0,0,0,0,0,0];
+  const note = (rvNote[sid] ?? (reviews[sid]&&reviews[sid].note) ?? '').trim();
+  const now = new Date().toISOString();
+  d.querySelectorAll('[data-act]').forEach(x=>x.disabled=true); msg.textContent = 'Saving…';
+  try {
+    if(b.dataset.act === 'approve'){
+      await db.doc('library/' + sid).set({lesson: toLesson(it, p), addedAt: (reviews[sid]&&reviews[sid].addedAt) || now});
+      await db.doc('reviews/' + sid).set({status:'approved', p, note, at: now, addedAt: (reviews[sid]&&reviews[sid].addedAt) || now});
+    } else if(b.dataset.act === 'decline'){
+      if(statusOf(sid) === 'approved') await db.doc('library/' + sid).delete();
+      await db.doc('reviews/' + sid).set({status:'declined', p, note, at: now});
+    } else if(b.dataset.act === 'unpublish' || b.dataset.act === 'reopen'){
+      if(statusOf(sid) === 'approved') await db.doc('library/' + sid).delete();
+      await db.doc('reviews/' + sid).set({status:'submitted', p, note, at: now});
+    }
+    delete rvP[sid]; delete rvNote[sid];
+    msg.textContent = 'Saved.';
+  } catch(err){
+    msg.textContent = err && err.code === 'invalid_argument' ? "You don't have permission to change the library." : 'That didn’t save. Check your connection and try again.';
+    d.querySelectorAll('[data-act]').forEach(x=>x.disabled=false);
+  }
+});
+
+async function connect(){
+  if(!window.claude || typeof window.claude.use !== 'function'){ setMode(); return; }
+  const [d, u] = await Promise.all([claude.use('db'), claude.use('user')]);
+  db = d;
+  if(u){
+    try { uid = await u.id(); isEditor = await u.canEdit(); const c = await u.can('data.write'); canWrite = c === null ? true : !!c; } catch(e){}
+  }
+  if(!db || !uid) canWrite = false;
+  setMode();
+  if(!db) return;
+  db.collection('library').onSnapshot(s => {
+    approved = s.docs.map(doc => { const v = doc.data() || {}; return Object.assign({}, v.lesson || {}, {id:'s-' + doc.id, isNew:true}); })
+      .filter(x => x.title && Array.isArray(x.desc) && x.ben && Array.isArray(x.grades) && Array.isArray(x.subjects) && Array.isArray(x.tools) && Array.isArray(x.res) && Array.isArray(x.authors) && Array.isArray(x.formats));
+    setData();
+  }, () => {});
+  db.collection('reviews').onSnapshot(s => { reviews = {}; s.docs.forEach(doc => reviews[doc.id] = doc.data()); renderMine(); renderReview(); }, () => {});
+  if(uid) db.doc('submissions/' + uid).onSnapshot(s => { mySubs = s.exists ? ((s.data()||{}).items || []) : []; renderMine(); }, () => {});
+  if(isEditor) db.collection('submissions').onSnapshot(s => {
+    allSubs = s.docs.flatMap(doc => ((doc.data()||{}).items || []).map(it => Object.assign({}, it, {uid: doc.id})));
+    renderReview();
+  }, () => {});
+}
+
+/* routing */
+const views = ['browse','practices','submit','review','roadmap'];
+function route(){
+  const h = location.hash.replace('#','');
+  const m = h.match(/^lesson-([\w-]+)$/);
+  if(m && openLesson(m[1])) return;
+  hideDrawer();
+  const v = views.includes(h) ? h : 'browse';
+  lastView = v;
+  views.forEach(n => $('view-'+n).hidden = n !== v);
+  document.querySelectorAll('.tabs a').forEach(a => { if(a.dataset.view === v) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current'); });
+}
+window.addEventListener('hashchange', route);
+
+const fd = $('filterDetails');
+fd.open = window.matchMedia('(min-width: 861px)').matches;
+
+restoreDraft();
+setMode();
+renderReview();
+setData(); route();
+connect();
+})();
+</script>
+
+</body>
+</html>
