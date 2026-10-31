@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>AI Exemplar Library</title>
+<title>AI Exemplar Library Demo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@500&display=swap">
@@ -15,7 +15,7 @@ body{margin:0}img{max-width:100%}[hidden]{display:none!important}
   --paper:#F2F5F6; --surface:#FFFFFF; --ink:#0F2830; --muted:#566A71; --line:#D3DEE2; --soft:#E6EDF0;
   --lake:#0D5E78; --lake-ink:#FFFFFF; --band:#0B3D4E; --band-ink:#EAF4F7; --band-muted:#A9C7D1; --sand:#E2A53A;
   --p1:#1D63A6; --p2:#6A4B9E; --p3:#11765F; --p4:#A64D17; --p5:#A02F5C; --p6:#5E6E14;
-  --scrim:rgba(8,28,36,.45);
+  --scrim:rgba(8,28,36,.45); --on-sand:#1F1604;
   --display:"Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
   --body:"Source Sans 3", "Segoe UI", system-ui, -apple-system, sans-serif;
   --mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
@@ -329,6 +329,12 @@ footer .wrap{padding-block:20px 32px}
 .cempty{font-size:14px;color:var(--muted);margin:0}
 @media (max-width:860px){ .reqwrap{grid-template-columns:minmax(0,1fr)} }
 
+.demobar{background:var(--sand);color:var(--on-sand);font-size:14px}
+.demobar .wrap{padding-block:8px;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between}
+.democtl{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+.demobar .chip{padding:3px 10px;font-size:13px;border-color:var(--on-sand);background:transparent;color:var(--on-sand)}
+.demobar .chip[aria-pressed="true"]{background:var(--on-sand);color:var(--sand)}
+.demobar .linkbtn{color:var(--on-sand)}
 @media (max-width:860px){
   .browse{grid-template-columns:minmax(0,1fr);gap:18px}
   .rail{position:static;max-height:none;overflow:visible;padding:0}
@@ -639,6 +645,7 @@ const P = [
   {k:'Equity', s:'Equity', d:'AI is used to differentiate, scaffold, increase access, or identify gaps so every student gets needed support.'},
   {k:'Transparency', s:'Transparency', d:'AI use is openly communicated or documented for students, families or audiences (e.g., norms, disclosures, AI use logs).'}
 ];
+const DEMO = true;
 /* Shown when a visitor can't save through the page. Set to an address to show it. */
 const COORD = '';
 const pc = i => `var(--p${i+1})`;
@@ -1417,14 +1424,134 @@ $('insBar').addEventListener('click', e => { const b = e.target.closest('[data-s
 
 function refreshAll(){ renderMine(); renderReview(); renderRequests(); renderInsights(); renderUCList(); render(); }
 
+/* ---------- demo mode: sample community data kept in this browser ---------- */
+const DEMO_KEY = 'exlib-demo-v1';
+function demoRole(){ try{ return localStorage.getItem('exlib-demo-role') || 'contributor'; }catch(e){ return 'contributor'; } }
+function demoSeed(){
+  const ago = d => new Date(Date.now() - d * 864e5 - Math.round(d * 3.7e6)).toISOString();
+  const S = {};
+  const sub = (o) => Object.assign({benT:[], benS:[], tools:[], formats:['Lesson Plan Document'], p:[0,0,0,0,0,0], ev:'', authorRole:'Teacher Ambassador', consent:true}, o);
+  S['submissions/u_maria'] = {items:[sub({sid:'demo-debate', title:'AI Debate Coach for Argument Writing',
+    descRaw:'Eighth and ninth graders practice argument writing by debating a SchoolAI coach set up to push back on weak evidence. Students state a claim, the coach asks for evidence and raises counterarguments, and students revise their claims in a graphic organizer.\n\nThe teacher reviews chat transcripts to find students who need small-group help with evidence and reasoning.',
+    benT:['Shows which students struggle to support a claim','Gives every student a debate partner at once'], benS:['Low-stakes practice defending ideas','Immediate pushback that sharpens their evidence'],
+    grades:['8th','9th'], subjects:['ELA','Social Studies'], role:'Student', tools:[{l:'SchoolAI',u:'https://schoolai.com'}],
+    res:[{l:'Lesson Plan Document',u:'https://example.org/sample-lesson'}], p:[2,0,1,2,1,0], ev:'Students must cite text evidence and evaluate whether the AI counterargument is fair before revising.',
+    name:'Maria Alvarez', school:'Lakeview Middle School', submittedAt:ago(6)})]};
+  S['submissions/u_devon'] = {items:[
+    sub({sid:'demo-lab', title:'AI Feedback on Chemistry Lab Reports',
+      descRaw:'Tenth and eleventh grade chemistry students submit lab report drafts to Brisk, which gives feedback aligned to a teacher-built rubric for claim, evidence and reasoning.\n\nStudents revise using the feedback, then highlight which suggestions they accepted or rejected and why. The teacher spot-checks the AI feedback before final grading.',
+      benT:['Faster first-round feedback on long reports'], benS:['Revise before the deadline instead of after'],
+      grades:['10th','11th'], subjects:['Science'], role:'Student', tools:[{l:'Brisk',u:'https://briskteaching.com'}],
+      res:[{l:'Lesson Plan Document',u:'https://example.org/sample-lab'},{l:'Image',u:'https://example.org/sample-rubric'}], formats:['Lesson Plan Document','Image'], p:[2,1,1,2,1,1],
+      ev:'Students document which AI suggestions they rejected. No names are entered into the tool.', name:'Devon Brooks', school:'Riverside High School', submittedAt:ago(19)}),
+    sub({sid:'demo-autograde', title:'Auto-Scoring Essays with ChatGPT',
+      descRaw:'Students paste their essays into ChatGPT with a rubric and the AI assigns a score out of 20, which is entered in the gradebook.',
+      grades:['11th','12th'], subjects:['ELA'], role:'Student', tools:[{l:'ChatGPT',u:'https://chat.openai.com'}],
+      res:[{l:'Lesson Plan Document',u:'https://example.org/sample-essay'}], p:[1,0,0,0,0,0], name:'Devon Brooks', school:'Riverside High School', submittedAt:ago(24)})
+  ]};
+  S['submissions/u_priya'] = {items:[sub({sid:'demo-kinder', title:'Picture Prompts for Kindergarten Read-Alouds',
+    descRaw:'During read-aloud, the teacher uses Gemini to create a picture of the scene students describe. Students compare the AI picture with the book illustration and talk about what the AI got right and wrong.',
+    benS:['Builds vocabulary as students describe details','Early, playful look at how AI follows instructions'],
+    grades:['Kindergarten','1st'], subjects:['ELA'], role:'Educator', tools:[{l:'Gemini',u:'https://gemini.google.com'}],
+    res:[{l:'Video',u:'https://example.org/sample-video'}], formats:['Video'], p:[2,0,2,1,0,1],
+    ev:'Students notice the AI made mistakes and explain how to fix the prompt.', name:'Priya Natarajan', school:'Northside Elementary', submittedAt:ago(3)})]};
+  S['submissions/u_demo'] = {items:[sub({sid:'demo-mine', title:'Leveled Primary Sources for 5th Grade Social Studies',
+    descRaw:'The teacher uses MagicSchool to rewrite a primary source letter at three reading levels. Students read the version that fits them, then compare it with the original to see what changed.\n\nStudents discuss whether the rewritten versions kept the author’s meaning.',
+    benT:['Every student can work with the same source'], benS:['Access to grade-level content','Practice spotting how meaning shifts'],
+    grades:['5th'], subjects:['Social Studies'], role:'Educator', tools:[{l:'MagicSchool',u:'https://www.magicschool.ai'}],
+    res:[{l:'Lesson Plan Document',u:'https://example.org/sample-sources'}], p:[2,0,1,2,2,0], name:'You (demo)', school:'Sample School', submittedAt:ago(2)})]};
+  S['reviews/demo-lab'] = {status:'approved', p:[2,1,1,2,1,1], note:'Great example of students evaluating AI feedback.', at:ago(12), addedAt:ago(12)};
+  S['reviews/demo-autograde'] = {status:'declined', p:[1,0,0,0,0,0], note:'Add a step where the teacher reviews AI scores before they reach the gradebook, then resubmit.', at:ago(20)};
+  const lab = S['submissions/u_devon'].items[0];
+  S['library/demo-lab'] = {lesson: toLesson(lab, [2,1,1,2,1,1]), addedAt: ago(12)};
+  S['contacts/u_maria'] = {email:'maria.sample@example.org'};
+  S['peer/u_sam'] = {reviews:{
+    'demo-debate':{rec:'ready', comment:'Transcripts as a formative check is smart. I’d use this with my 7th graders.', name:'Sam Kowalski', at:ago(5)},
+    'demo-kinder':{rec:'changes', comment:'Love it. Add a sentence on how you keep the device on your side so students don’t use it directly.', name:'Sam Kowalski', at:ago(2)},
+    'demo-mine':{rec:'ready', comment:'Comparing versions to the original is the best part. Ready to go.', name:'Sam Kowalski', at:ago(1)}}};
+  S['peer/u_hannah'] = {reviews:{
+    'demo-debate':{rec:'ready', comment:'Clear purpose and a real check on the AI. Maybe add the SchoolAI room settings you used.', name:'Hannah Lee', at:ago(4)},
+    'demo-autograde':{rec:'nofit', comment:'Scores go straight to the gradebook with no teacher review, which conflicts with Human Oversight.', name:'Hannah Lee', at:ago(22)}}};
+  S['peer/u_marcus'] = {reviews:{
+    'demo-debate':{rec:'changes', comment:'Strong lesson. Please add a note about not entering student names into the chat.', name:'Marcus Webb', at:ago(3)},
+    'demo-mine':{rec:'changes', comment:'Could you share the three leveled versions as an example?', name:'Marcus Webb', at:ago(1)}}};
+  S['peer/u_jordan'] = {reviews:{'demo-lab':{rec:'ready', comment:'Students labeling accepted and rejected suggestions is a great literacy move.', name:'Jordan Reyes', at:ago(15)}}};
+  const uc = (id, lessonId, lessonTitle, rating, how, changes, tip, grade, subject, name, school, d) => ({id, lessonId, lessonTitle, rating, how, changes, tip, grade, subject, name, school, at: ago(d)});
+  S['usecases/u_sam'] = {items:[
+    uc('uc1','5','AI-Powered Text Leveling for Differentiated Reading',5,'Leveled our science article on ecosystems into three versions for 4th grade centers.','Added a vocabulary preview card for each level.','Check that key science terms survive the rewrite.','4th','Science','Sam Kowalski','Lakeview Middle School',9),
+    uc('uc2','30','AI-Supported Middle School Math Practice with SNORKL',4,'Used SNORKL for exit tickets on ratios in 7th grade math.','Students recorded explanations instead of typing.','Model a good explanation first; the AI feedback is better when students say more.','7th','Math','Sam Kowalski','Lakeview Middle School',4)]};
+  S['usecases/u_hannah'] = {items:[
+    uc('uc3','5','AI-Powered Text Leveling for Differentiated Reading',4,'Used it for a 3rd grade biography unit with three reading groups.','Read the hardest version aloud as a class first.','','3rd','ELA','Hannah Lee','Northside Elementary',14),
+    uc('uc4','29','AI-Supported Student Podcast Project',5,'Fifth graders made two-minute podcasts on Michigan history.','Skipped music to keep it to two class periods.','The AI use log was the most valuable part for families.','5th','Social Studies','Hannah Lee','Northside Elementary',6),
+    uc('uc5','demo-lab','AI Feedback on Chemistry Lab Reports',4,'Adapted it for 9th grade biology lab write-ups.','Simplified the rubric to claim and evidence only.','','9th','Science','Hannah Lee','Northside Elementary',8)].map(x => x.id === 'uc5' ? Object.assign(x, {lessonId:'s-demo-lab'}) : x)};
+  S['usecases/u_marcus'] = {items:[
+    uc('uc6','20','AI-Supported Reading Fluency Practice',3,'Tried fluency practice with 2nd grade intervention groups.','Used headphones and a quiet corner; background noise hurt the scores.','Double-check the AI fluency scores against your own running record.','2nd','ELA','Marcus Webb','Riverside Elementary',11),
+    uc('uc7','25','AI-Powered Figurative Language Scavenger Hunt with Feedback',5,'Ran the scavenger hunt with 7th graders using song lyrics.','','Let students pick their own song for the last round.','7th','ELA','Marcus Webb','Riverside Middle School',5)]};
+  S['usecases/u_jordan'] = {items:[
+    uc('uc8','27','AI-Driven Heroes in History Project: Got Grit',5,'Fourth graders made AI portraits of local Michigan heroes and checked them for accuracy.','Added a bias checklist from the podcast lesson.','','4th','Social Studies','Jordan Reyes','Pine Ridge Elementary',7),
+    uc('uc9','5','AI-Powered Text Leveling for Differentiated Reading',5,'Middle school special education co-teaching: leveled every unit text.','Kept a shared folder of leveled texts so the team could reuse them.','','6th','ELA','Jordan Reyes','Pine Ridge Middle School',3)]};
+  const tr = (id, title, cat, details, name, d) => ({id, title, cat, details, name, at: ago(d)});
+  S['topicreqs/u_maria'] = {items:[tr('t1','Using AI to draft IEP progress-monitoring notes','Administrative & leadership','Show how to keep student data private while saving time on progress notes.','Maria Alvarez',16), tr('t2','Structured literacy phonics practice with AI','PA 146 literacy & dyslexia','Decodable text generation that follows a scope and sequence.','Maria Alvarez',9)]};
+  S['topicreqs/u_priya'] = {items:[tr('t3','Parent newsletter and family communication templates','Workflow & productivity','Prompts that translate newsletters and keep a warm tone.','Priya Natarajan',12), tr('t4','AI for kindergarten center rotations','Classroom lessons','','Priya Natarajan',4)]};
+  S['topicreqs/u_sam'] = {items:[tr('t5','Dyslexia screening follow-up: what AI can and can’t do','PA 146 literacy & dyslexia','Clear guidance on where AI fits after universal screening.','Sam Kowalski',7), tr('t6','Principal walkthrough feedback with AI','Administrative & leadership','Turning walkthrough notes into growth-focused feedback.','Sam Kowalski',2)]};
+  S['topicreqs/u_hannah'] = {items:[tr('t7','Rubric drafting with AI for project-based learning','Workflow & productivity','','Hannah Lee',5)]};
+  const V = {u_maria:['t1','t2','t5'], u_priya:['t3','t1','t4'], u_sam:['t5','t6','t2','t1'], u_hannah:['t7','t2','t5','t1'], u_marcus:['t2','t5','t3'], u_jordan:['t1','t2','t7'], u_devon:['t5','t3'], u_lee:['t2','t1'], u_kim:['t5']};
+  Object.keys(V).forEach(k => S['votes/' + k] = {ids: V[k]});
+  S['votes/u_demo'] = {ids:['t2']};
+  S['mod/topics'] = {t1:'planned', t2:'progress', t3:'planned'};
+  S['mod/usecases'] = {};
+  return S;
+}
+function makeDemoDb(){
+  let store = null;
+  try { store = JSON.parse(localStorage.getItem(DEMO_KEY) || 'null'); } catch(e){}
+  if(!store || typeof store !== 'object') store = demoSeed();
+  const subs = [];
+  const save = () => { try { localStorage.setItem(DEMO_KEY, JSON.stringify(store)); } catch(e){} };
+  const snap = c => { const docs = Object.keys(store).filter(p => { const s = p.split('/'); return s.length === 2 && s[0] === c; }).map(p => ({id: p.split('/')[1], exists: true, data: () => store[p], metadata: {fromCache:false, hasPendingWrites:false}})); return {docs, size: docs.length, empty: !docs.length, docChanges: () => [], metadata: {}}; };
+  const fire = () => subs.forEach(s => s.fn(snap(s.c)));
+  const api = {
+    collection: c => ({ onSnapshot: fn => { const s = {c, fn}; subs.push(s); setTimeout(() => fn(snap(c)), 0); return () => { const i = subs.indexOf(s); if(i >= 0) subs.splice(i, 1); }; }, doc: id => api.doc(c + '/' + id) }),
+    doc: p => ({ set: async d => { store[p] = JSON.parse(JSON.stringify(d)); save(); setTimeout(fire, 0); }, delete: async () => { delete store[p]; save(); setTimeout(fire, 0); } }),
+    reset: () => { store = demoSeed(); save(); fire(); }
+  };
+  return api;
+}
+function demoBanner(){
+  const bar = document.createElement('div');
+  bar.className = 'demobar';
+  bar.innerHTML = `<div class="wrap"><span><b>Demo</b> with sample data. You're viewing as <b id="demoRoleName"></b>. Anything you add is saved only in this browser.</span>
+    <span class="democtl"><span class="chips" role="group" aria-label="View the demo as"><button type="button" class="chip" data-role="contributor">Contributor</button><button type="button" class="chip" data-role="editor">Editor</button></span>
+    <button type="button" class="linkbtn" id="demoReset">Reset sample data</button></span></div>`;
+  document.body.insertBefore(bar, document.body.firstChild);
+  const paint = () => { $('demoRoleName').textContent = isEditor ? 'an editor' : 'a contributor'; bar.querySelectorAll('[data-role]').forEach(b => b.setAttribute('aria-pressed', (b.dataset.role === 'editor') === isEditor)); };
+  paint();
+  bar.addEventListener('click', e => {
+    const r = e.target.closest('[data-role]');
+    if(r){ isEditor = r.dataset.role === 'editor'; try{ localStorage.setItem('exlib-demo-role', r.dataset.role); }catch(err){} paint(); setMode(); refreshAll(); if(curLesson){ const box = $('ucFormBox'); if(box) delete box.dataset.built; renderUCForm(); } return; }
+    if(e.target.closest('#demoReset')){
+      const b = $('demoReset');
+      if(b.dataset.armed !== '1'){ b.dataset.armed = '1'; b.textContent = 'Click again to reset'; setTimeout(() => { b.dataset.armed = ''; b.textContent = 'Reset sample data'; }, 3000); return; }
+      b.dataset.armed = ''; b.textContent = 'Reset sample data';
+      Object.keys(own).forEach(k => own[k] = null);
+      db.reset();
+    }
+  });
+}
+
 async function connect(){
-  if(!window.claude || typeof window.claude.use !== 'function'){ setMode(); return; }
-  const [d, u] = await Promise.all([claude.use('db'), claude.use('user')]);
-  db = d;
-  if(u){
-    try { uid = await u.id(); isEditor = await u.canEdit(); const c = await u.can('data.write'); canWrite = c === null ? true : !!c; } catch(e){}
+  if(DEMO){
+    db = makeDemoDb(); uid = 'u_demo'; canWrite = true; isEditor = demoRole() === 'editor';
+    demoBanner();
+  } else {
+    if(!window.claude || typeof window.claude.use !== 'function'){ setMode(); return; }
+    const [d, u] = await Promise.all([claude.use('db'), claude.use('user')]);
+    db = d;
+    if(u){
+      try { uid = await u.id(); isEditor = await u.canEdit(); const c = await u.can('data.write'); canWrite = c === null ? true : !!c; } catch(e){}
+    }
+    if(!db || !uid) canWrite = false;
   }
-  if(!db || !uid) canWrite = false;
   setMode();
   if(!db) return;
   const sub = (coll, fn) => db.collection(coll).onSnapshot(s => { fn(s); refreshAll(); }, () => {});
@@ -1456,7 +1583,7 @@ async function connect(){
     s.docs.forEach(doc => { if(doc.id === uid) own.votes = doc.data(); [...new Set((doc.data()||{}).ids || [])].forEach(id => voteCount[id] = (voteCount[id]||0) + 1); });
   });
   sub('mod', s => { mod = {topics:{}, usecases:{}}; s.docs.forEach(doc => { if(doc.id in mod) mod[doc.id] = doc.data() || {}; }); });
-  if(isEditor) sub('contacts', s => { contacts = {}; s.docs.forEach(doc => contacts[doc.id] = doc.data()); });
+  if(isEditor || DEMO) sub('contacts', s => { contacts = {}; s.docs.forEach(doc => contacts[doc.id] = doc.data()); });
 }
 
 /* routing */
